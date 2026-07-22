@@ -2755,6 +2755,37 @@ function setupNegativeTelegram() {
     : 'Канал сохранён, но тест не прошёл: ' + (result.error || 'неизвестная ошибка'));
 }
 
+function captureNegativeChannel_(upd) {
+  var chat = null;
+  if (upd && upd.channel_post && upd.channel_post.chat) chat = upd.channel_post.chat;
+  if (upd && upd.my_chat_member && upd.my_chat_member.chat) chat = upd.my_chat_member.chat;
+  if (!chat || chat.type !== 'channel' || !chat.id) return false;
+  var title = (chat.title || '').toString().toLowerCase().replace(/ё/g, 'е');
+  if (title.indexOf('ежедневн') < 0 || title.indexOf('мониторинг') < 0) return false;
+
+  var props = PropertiesService.getScriptProperties();
+  var chatId = String(chat.id);
+  if (props.getProperty('TG_NEG_CHAT') === chatId) return true;
+  props.setProperty('TG_NEG_CHAT', chatId);
+  sendTelegramDetailed_(
+    '<b>Канал «Ежедневный мониторинг» подключён</b>\n\n' +
+    'Сюда будут поступать подтверждённые жалобы и происшествия из городских пабликов.',
+    {},
+    chatId
+  );
+  skoLog_('Telegram', 'Автоматически подключён канал «Ежедневный мониторинг»');
+  return true;
+}
+
+function negativeChannelStatus_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  return { ok: true, configured: !!props.getProperty('TG_NEG_CHAT') };
+}
+
 function setupMonitorBridge() {
   var ui = SpreadsheetApp.getUi();
   var execUrl = ScriptApp.getService().getUrl();
@@ -3475,6 +3506,9 @@ function doPost(e) {
     if (upd && upd.action === 'historical') return jsonOutput_(handleHistoricalResults_(upd));
     if (upd && upd.action === 'stop_external_main') return jsonOutput_(stopExternalMainDelivery_(upd));
     if (upd && upd.action === 'enable_legacy_auto') return jsonOutput_(enableLegacyAutoCheck_(upd));
+    if (upd && upd.action === 'negative_status') return jsonOutput_(negativeChannelStatus_(upd));
+
+    if (captureNegativeChannel_(upd)) return ContentService.createTextOutput('ok');
 
     // ЗАЩИТА ОТ ПОВТОРОВ: Telegram ретраит команду, если вебхук отвечает
     // медленно (наши проверки идут 1-3 мин). Помним ID обработанных
