@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-instagram = ["instaloader>=4.13,<5"]
+instagram = ["instaloader>=4.13,<5", "browser-cookie3>=0.20,<1"]
 semantic = ["sentence-transformers>=3.0,<6"]
 media = ["pytesseract>=0.3.13,<1", "Pillow>=10,<13"]
 video = ["faster-whisper>=1.1,<2", "yt-dlp>=2025.1.1"]
@@ -29,6 +29,7 @@ dev = [
 ]
 all = [
   "instaloader>=4.13,<5",
+  "browser-cookie3>=0.20,<1",
   "sentence-transformers>=3.0,<6",
   "pytesseract>=0.3.13,<1",
   "Pillow>=10,<13",

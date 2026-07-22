@@ -37,6 +37,11 @@ def build_parser() -> argparse.ArgumentParser:
     instagram.add_argument("--username", required=True)
     instagram.add_argument("--output", default="data/instagram-session")
     instagram.add_argument("--macos-dialog", action="store_true")
+    instagram.add_argument(
+        "--browser",
+        choices=("brave", "chrome", "chromium", "edge", "firefox", "safari", "vivaldi"),
+        default="",
+    )
     search = sub.add_parser("search", help="Смысловой поиск за период без накопления архива")
     search.add_argument("--query", required=True)
     search.add_argument("--from-date", required=True, type=date.fromisoformat)
@@ -82,6 +87,7 @@ def main(argv: list[str] | None = None) -> None:
             args.username,
             Path(args.output).expanduser().resolve(),
             macos_dialog=args.macos_dialog,
+            browser=args.browser,
         )
         print(f"Instagram session saved: {path}")
         return

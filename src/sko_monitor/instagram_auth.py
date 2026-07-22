@@ -53,7 +53,46 @@ def _macos_confirm_checkpoint(url: str) -> None:
     )
 
 
-def create_session(username: str, destination: Path, *, macos_dialog: bool = False) -> Path:
+def create_browser_session(username: str, destination: Path, browser: str) -> Path:
+    try:
+        import browser_cookie3
+        import instaloader
+    except ImportError as exc:
+        raise RuntimeError("Install the optional Instagram browser dependencies first") from exc
+    browser_loader = getattr(browser_cookie3, browser, None)
+    if not browser_loader:
+        raise RuntimeError(f"Unsupported browser: {browser}")
+    cookies = {
+        cookie.name: cookie.value
+        for cookie in browser_loader(domain_name="instagram.com")
+        if "instagram.com" in cookie.domain
+    }
+    if not cookies.get("sessionid"):
+        raise RuntimeError(f"Instagram login cookie was not found in {browser}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    loader = instaloader.Instaloader(quiet=False)
+    loader.context.update_cookies(cookies)
+    loader.context.username = username
+    loader.save_session_to_file(str(destination))
+    return destination
+
+
+def create_session(
+    username: str,
+    destination: Path,
+    *,
+    macos_dialog: bool = False,
+    browser: str = "",
+) -> Path:
+    if browser:
+        try:
+            return create_browser_session(username, destination, browser)
+        except Exception:
+            if not macos_dialog:
+                raise
+            _macos_message(
+                f"Не удалось взять готовый вход из {browser}. Перехожу к обычному входу."
+            )
     try:
         import instaloader
     except ImportError as exc:

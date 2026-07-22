@@ -27,6 +27,7 @@ mkdir -p data
 .venv/bin/sko-monitor instagram-login \
   --username "$INSTAGRAM_USER" \
   --output data/instagram-session \
+  --browser chrome \
   --macos-dialog
 
 chmod 600 data/instagram-session

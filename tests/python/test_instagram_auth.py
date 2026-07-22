@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import instaloader
 
@@ -62,3 +63,30 @@ def test_macos_login_opens_checkpoint_and_retries(tmp_path, monkeypatch) -> None
     assert checkpoints == [
         "https://www.instagram.com/auth_platform/?apc=verification-token"
     ]
+
+
+def test_browser_session_is_saved_without_network_login(tmp_path, monkeypatch) -> None:
+    loader = FakeLoader()
+
+    def cookie_loader(domain_name: str) -> list[SimpleNamespace]:
+        assert domain_name == "instagram.com"
+        return [
+            SimpleNamespace(name="sessionid", value="session-cookie", domain=".instagram.com"),
+            SimpleNamespace(name="csrftoken", value="csrf-cookie", domain=".instagram.com"),
+        ]
+
+    monkeypatch.setattr(instaloader, "Instaloader", lambda quiet: loader)
+    monkeypatch.setattr(instagram_auth, "_macos_message", lambda _message: None)
+    import browser_cookie3
+
+    monkeypatch.setattr(browser_cookie3, "chrome", cookie_loader)
+    updated: list[dict[str, str]] = []
+    loader.context = SimpleNamespace(update_cookies=updated.append, username=None)
+
+    destination = tmp_path / "session"
+    result = instagram_auth.create_browser_session("user", destination, "chrome")
+
+    assert result == destination
+    assert loader.context.username == "user"
+    assert updated == [{"sessionid": "session-cookie", "csrftoken": "csrf-cookie"}]
+    assert loader.saved_to == str(destination)
