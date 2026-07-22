@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from ..models import Publication, Source
 from .base import Collector
+from .parsing import compact_title
 
 
 class SocialPageCollector(Collector):
@@ -47,7 +48,7 @@ class SocialPageCollector(Collector):
                     platform=source.platform,
                     workflow=source.workflow,
                     url=clean,
-                    title=(text[:180] + "…") if len(text) > 180 else text or f"Публикация {source.name}",
+                    title=compact_title(text) if text else f"Публикация {source.name}",
                     text=text[:8000],
                 )
             )

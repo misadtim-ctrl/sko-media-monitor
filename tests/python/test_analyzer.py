@@ -52,6 +52,23 @@ def test_other_region_does_not_cancel_explicit_sko_mention() -> None:
     assert result.relevant
 
 
+def test_truncated_speed_is_not_sko_abbreviation() -> None:
+    result = analyzer.analyze(
+        item("sko_mentions", "В Алматинской области мопедист ехал на полной ско…")
+    )
+    assert not result.relevant
+
+
+def test_ambiguous_kyzylzhar_in_aktobe_is_not_sko() -> None:
+    result = analyzer.analyze(
+        item(
+            "sko_mentions",
+            "В Актюбинской области скот погиб в Кызылжарском сельском округе",
+        )
+    )
+    assert not result.relevant
+
+
 def test_akimat_road_complaint_is_negative() -> None:
     result = analyzer.analyze(
         item("akimat_negative", "Жители жалуются на разбитую дорогу и просят акимат принять меры")

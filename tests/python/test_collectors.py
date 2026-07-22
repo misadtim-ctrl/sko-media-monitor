@@ -2,6 +2,7 @@ import httpx
 import pytest
 import respx
 
+from sko_monitor.collectors.parsing import compact_title
 from sko_monitor.collectors.telegram import TelegramCollector
 from sko_monitor.collectors.website import WebsiteCollector
 from sko_monitor.models import Publication, Source
@@ -84,3 +85,8 @@ def test_article_hydration_prefers_structured_article_body() -> None:
     WebsiteCollector._hydrate_article(publication, html)
     assert publication.text == "В Петропавловске открыли школу."
     assert publication.published_at is not None
+
+
+def test_compact_title_never_cuts_a_word_into_fake_sko() -> None:
+    title = compact_title("А" * 160 + " мопедист ехал на полной скорости и скрылся", limit=190)
+    assert " ско…" not in title.lower()

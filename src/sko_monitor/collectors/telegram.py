@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from ..models import Publication, Source
 from .base import Collector
-from .parsing import parse_datetime
+from .parsing import compact_title, parse_datetime
 
 
 class TelegramCollector(Collector):
@@ -49,7 +49,7 @@ class TelegramCollector(Collector):
                     platform=source.platform,
                     workflow=source.workflow,
                     url=f"https://t.me/{post_id}",
-                    title=(text[:180] + "…") if len(text) > 180 else text,
+                    title=compact_title(text),
                     text=text[:12000],
                     published_at=published,
                     media_urls=list(dict.fromkeys(url for url in media_urls if url))[:4],

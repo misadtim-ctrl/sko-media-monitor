@@ -25,3 +25,11 @@ def parse_datetime(value: Any) -> datetime | None:
     if result.tzinfo is None:
         result = result.replace(tzinfo=UTC)
     return result.astimezone(UTC)
+
+
+def compact_title(text: str, limit: int = 180) -> str:
+    clean = " ".join(text.split())
+    if len(clean) <= limit:
+        return clean
+    shortened = clean[:limit].rsplit(" ", 1)[0].rstrip()
+    return (shortened or clean[:limit]).rstrip(".,;:!?") + "…"

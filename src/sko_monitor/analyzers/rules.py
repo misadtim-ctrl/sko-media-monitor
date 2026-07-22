@@ -64,6 +64,33 @@ SKO_STOP = (
     "петропавловка",
 )
 
+AMBIGUOUS_DISTRICTS = {
+    "кызылжарск",
+    "жамбылский район",
+    "жамбыл ауданы",
+    "есильский район",
+    "есіл ауданы",
+}
+
+OTHER_REGION_MARKERS = (
+    "акмолинск",
+    "актюбинск",
+    "алматинск",
+    "атырауск",
+    "восточно-казахстанск",
+    "жамбылск",
+    "жетысу",
+    "западно-казахстанск",
+    "карагандинск",
+    "костанайск",
+    "кызылординск",
+    "мангистауск",
+    "павлодарск",
+    "туркестанск",
+    "улытау",
+    "абайск",
+)
+
 NEGATIVE_CATEGORIES: dict[str, tuple[str, ...]] = {
     "дороги": (
         "ямы",
@@ -207,10 +234,21 @@ def score_sko(text: str) -> RuleScore:
         if marker in low:
             matched.append(label)
             places.append(label)
-    if re.search(r"(?<![а-яa-z])ско(?![а-яa-z])", low, re.IGNORECASE):
+    explicit_sko = bool(re.search(r"(?<![А-Яа-яA-Za-z])СКО(?![А-Яа-яA-Za-z])", text))
+    contextual_sko = bool(
+        re.search(
+            r"(?<![а-яa-z])(?:в|из|по|для|акимат|аким|жители|дчс)\s+ско(?![а-яa-z])",
+            low,
+        )
+    )
+    if explicit_sko or contextual_sko:
         matched.append("СКО")
+    has_explicit_region = bool(matched)
+    has_other_region = any(marker in low for marker in OTHER_REGION_MARKERS)
     for marker, label in SKO_DISTRICTS.items():
         if marker in low:
+            if marker in AMBIGUOUS_DISTRICTS and has_other_region and not has_explicit_region:
+                continue
             matched.append(label)
             places.append(label)
     for marker, label in SKO_PLACES.items():
