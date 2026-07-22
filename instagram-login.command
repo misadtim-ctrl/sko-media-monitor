@@ -1,14 +1,23 @@
 #!/bin/zsh
-set -e
+set -euo pipefail
 cd "$(dirname "$0")"
+
+pause_on_error() {
+  local status=$?
+  if [ "$status" -ne 0 ]; then
+    echo
+    echo "Вход не завершён. Окно останется открытым, чтобы была видна причина."
+    read -r "?Нажмите Enter, чтобы закрыть окно..."
+  fi
+}
+trap pause_on_error EXIT
 
 if [ ! -x ".venv/bin/sko-monitor" ]; then
   echo "Сначала запускаю установку..."
   zsh ./setup.command
 fi
 
-echo "Введите имя вашего СУЩЕСТВУЮЩЕГО аккаунта Instagram без @:"
-read -r INSTAGRAM_USER
+INSTAGRAM_USER="$(osascript -e 'text returned of (display dialog "Введите имя существующего аккаунта Instagram без @" default answer "" buttons {"Отмена", "Продолжить"} default button "Продолжить" cancel button "Отмена")')"
 if [ -z "$INSTAGRAM_USER" ]; then
   echo "Имя не введено."
   exit 1
@@ -17,7 +26,8 @@ fi
 mkdir -p data
 .venv/bin/sko-monitor instagram-login \
   --username "$INSTAGRAM_USER" \
-  --output data/instagram-session
+  --output data/instagram-session \
+  --macos-dialog
 
 chmod 600 data/instagram-session
 base64 < data/instagram-session | tr -d '\n' > data/instagram-session.b64

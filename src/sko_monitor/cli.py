@@ -36,6 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     instagram = sub.add_parser("instagram-login", help="Один раз сохранить вход в существующий Instagram")
     instagram.add_argument("--username", required=True)
     instagram.add_argument("--output", default="data/instagram-session")
+    instagram.add_argument("--macos-dialog", action="store_true")
     search = sub.add_parser("search", help="Смысловой поиск за период без накопления архива")
     search.add_argument("--query", required=True)
     search.add_argument("--from-date", required=True, type=date.fromisoformat)
@@ -77,7 +78,11 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     if args.command == "instagram-login":
-        path = create_session(args.username, Path(args.output).expanduser().resolve())
+        path = create_session(
+            args.username,
+            Path(args.output).expanduser().resolve(),
+            macos_dialog=args.macos_dialog,
+        )
         print(f"Instagram session saved: {path}")
         return
 
