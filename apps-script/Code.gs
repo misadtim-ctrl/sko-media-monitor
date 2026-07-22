@@ -1574,13 +1574,6 @@ function enableAutoCheck() {
     .everyHours(1)
     .create();
 
-  // Еженедельный автобэкап всей таблицы (понедельник, утро)
-  ScriptApp.newTrigger('makeWeeklyBackup_')
-    .timeBased()
-    .onWeekDay(ScriptApp.WeekDay.MONDAY)
-    .atHour(6)
-    .create();
-
   skoLog_('Автопроверка', 'ВКЛЮЧЕНА (каждые 30 мин днём, раз в час ночью)');
   notifyAdmin_('🟢 Мониторинг включён: проверка каждые 30 минут днём, раз в час ночью.');
   ui.alert(
@@ -1590,6 +1583,17 @@ function enableAutoCheck() {
     'Новые находки будут появляться на листах НАХОДКИ и НА ПРОВЕРКУ.\n' +
     'Открой таблицу с телефона или компа в любой момент — свежее сверху.'
   );
+}
+
+// Та же настройка без модального окна: нужна только для защищённого
+// дистанционного включения уже настроенного владельцем мониторинга.
+function enableAutoCheckSilent_() {
+  removeAutoTriggers_();
+  ScriptApp.newTrigger('runSkoCheckSilent').timeBased().everyMinutes(30).create();
+  ScriptApp.newTrigger('flushTelegramQueueSilent_').timeBased().everyMinutes(10).create();
+  ScriptApp.newTrigger('checkPythonHeartbeatSilent_').timeBased().everyHours(1).create();
+  skoLog_('Автопроверка', 'ВКЛЮЧЕНА без интерфейса');
+  return { ok: true, interval_minutes: 30 };
 }
 
 function disableAutoCheck() {
@@ -1614,30 +1618,6 @@ function removeAutoTriggers_() {
   });
   return removed;
 }
-
-// Еженедельная копия всей таблицы — страховка от случайной порчи.
-// Держим 4 последних бэкапа, старые удаляются сами.
-function makeWeeklyBackup_() {
-  try {
-    var ss = SpreadsheetApp.getActive();
-    var file = DriveApp.getFileById(ss.getId());
-    var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-    file.makeCopy('Бэкап мониторинга ' + stamp);
-
-    // Чистим старые бэкапы, оставляя 4 свежих
-    var it = DriveApp.searchFiles('title contains "Бэкап мониторинга"');
-    var backups = [];
-    while (it.hasNext()) backups.push(it.next());
-    backups.sort(function(a, b) { return b.getDateCreated() - a.getDateCreated(); });
-    for (var i = 4; i < backups.length; i++) backups[i].setTrashed(true);
-
-    skoLog_('Бэкап', 'Создан: Бэкап мониторинга ' + stamp);
-  } catch (e) {
-    skoLog_('Бэкап ошибка', e.message || String(e));
-    notifyAdmin_('⚠️ Еженедельный бэкап не создался: ' + tgEsc_(e.message || String(e)));
-  }
-}
-
 
 // ============================================================
 //  МОБИЛЬНАЯ ВЕРСИЯ (Web App)
@@ -3424,6 +3404,15 @@ function stopExternalMainDelivery_(payload) {
   return { ok: true, cancelled: cancelled };
 }
 
+function enableLegacyAutoCheck_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  return enableAutoCheckSilent_();
+}
+
 function handleHistoricalResults_(payload) {
   var props = PropertiesService.getScriptProperties();
   var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
@@ -3482,6 +3471,7 @@ function doPost(e) {
     if (upd && upd.action === 'heartbeat') return jsonOutput_(handleExternalHeartbeat_(upd));
     if (upd && upd.action === 'historical') return jsonOutput_(handleHistoricalResults_(upd));
     if (upd && upd.action === 'stop_external_main') return jsonOutput_(stopExternalMainDelivery_(upd));
+    if (upd && upd.action === 'enable_legacy_auto') return jsonOutput_(enableLegacyAutoCheck_(upd));
 
     // ЗАЩИТА ОТ ПОВТОРОВ: Telegram ретраит команду, если вебхук отвечает
     // медленно (наши проверки идут 1-3 мин). Помним ID обработанных

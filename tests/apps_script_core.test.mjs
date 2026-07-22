@@ -63,5 +63,7 @@ assert.notEqual(googleA, googleB, 'Unresolved Google News links must remain sepa
 assert.match(code, /SEEN_MAX:\s+50000/, 'Seen memory must cover more than one full crawl');
 assert.match(code, /enqueueTelegramFindings_\(findings, headerLabel\);\s*flushTelegramQueue_\(\);/s);
 assert.doesNotMatch(code, /tgSeen\[gk\]/, 'Channel dedupe must not suppress another publisher globally');
+assert.match(code, /function enableAutoCheckSilent_\(\)/);
+assert.doesNotMatch(code, /newTrigger\('makeWeeklyBackup_'\)/, 'Publication archive backups stay disabled');
 
 console.log('Apps Script core tests: OK');
