@@ -69,6 +69,23 @@ def test_ambiguous_kyzylzhar_in_aktobe_is_not_sko() -> None:
     assert not result.relevant
 
 
+def test_sko_village_without_oblast_name_is_relevant() -> None:
+    result = analyzer.analyze(item("sko_mentions", "В селе Пресноредуть открыли медпункт"))
+    assert result.relevant
+
+
+def test_same_village_name_in_another_region_is_not_sko() -> None:
+    result = analyzer.analyze(
+        item("sko_mentions", "В Акмолинской области обновили школу в селе Полтавка")
+    )
+    assert not result.relevant
+
+
+def test_regional_institution_is_relevant() -> None:
+    result = analyzer.analyze(item("sko_mentions", "На предприятии ЗИКСТО запустили новый цех"))
+    assert result.relevant
+
+
 def test_akimat_road_complaint_is_negative() -> None:
     result = analyzer.analyze(
         item("akimat_negative", "Жители жалуются на разбитую дорогу и просят акимат принять меры")
