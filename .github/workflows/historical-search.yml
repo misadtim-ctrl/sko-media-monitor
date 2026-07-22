@@ -1,0 +1,79 @@
+name: Search historical materials
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Тема обычным языком"
+        required: true
+        type: string
+      from_date:
+        description: "Начальная дата YYYY-MM-DD"
+        required: true
+        type: string
+      to_date:
+        description: "Конечная дата YYYY-MM-DD"
+        required: true
+        type: string
+      scope:
+        description: "Какие сайты обходить"
+        required: true
+        default: regional
+        type: choice
+        options:
+          - regional
+          - republican
+          - all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historical-search
+  cancel-in-progress: false
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Cache local semantic model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: sko-semantic-${{ runner.os }}-v1
+
+      - name: Install free semantic search
+        run: pip install '.[semantic]'
+
+      - name: Search every available sitemap for the selected period
+        env:
+          QUERY: ${{ inputs.query }}
+          DATE_FROM: ${{ inputs.from_date }}
+          DATE_TO: ${{ inputs.to_date }}
+          SEARCH_SCOPE: ${{ inputs.scope }}
+          APPS_SCRIPT_WEBHOOK_URL: ${{ secrets.APPS_SCRIPT_WEBHOOK_URL }}
+          MONITOR_WEBHOOK_SECRET: ${{ secrets.MONITOR_WEBHOOK_SECRET }}
+          CONCURRENCY: "8"
+        run: |
+          sko-monitor search \
+            --query "$QUERY" \
+            --from-date "$DATE_FROM" \
+            --to-date "$DATE_TO" \
+            --scope "$SEARCH_SCOPE"
+
+      - name: Downloadable CSV and Excel
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-search-results
+          path: exports/historical-latest.*
+          if-no-files-found: ignore
+          retention-days: 1

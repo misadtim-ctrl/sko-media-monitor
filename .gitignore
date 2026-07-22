@@ -1,0 +1,14 @@
+.venv/
+.tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.DS_Store
+.env
+data/
+exports/
+*.session
+*.sqlite3*
+apps-script/Code.original.gs

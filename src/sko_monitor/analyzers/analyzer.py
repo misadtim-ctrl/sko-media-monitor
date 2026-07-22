@@ -1,0 +1,48 @@
+from __future__ import annotations
+
+from ..models import Analysis, Publication
+from .rules import score_negative, score_sko
+from .semantic import SemanticScorer, compact_summary
+
+
+class PublicationAnalyzer:
+    def __init__(self, semantic: SemanticScorer) -> None:
+        self.semantic = semantic
+
+    def analyze(self, publication: Publication) -> Analysis:
+        text = publication.searchable_text()
+        if publication.workflow == "akimat_negative":
+            rules = score_negative(text)
+            semantic = self.semantic.score(publication.workflow, text)
+            score = max(rules.score, semantic)
+            relevant = rules.score >= 0.58 or semantic >= 0.60
+            needs_review = not relevant and score >= 0.48
+            category = rules.category if rules.score else "возможная жалоба"
+            tone = "негативная" if relevant or needs_review else "нейтральная"
+        elif publication.workflow == "sko_mentions":
+            rules = score_sko(text)
+            semantic = self.semantic.score(publication.workflow, text)
+            score = max(rules.score, semantic)
+            relevant = rules.score >= 0.72 or semantic >= 0.64
+            needs_review = not relevant and score >= 0.52
+            category = "упоминание СКО"
+            negative = score_negative(text)
+            tone = "негативная" if negative.score >= 0.58 else "нейтральная"
+        else:
+            rules = score_sko(text)
+            score = rules.score
+            relevant = True
+            needs_review = False
+            category = "региональная новость"
+            tone = "негативная" if score_negative(text).score >= 0.58 else "нейтральная"
+
+        return Analysis(
+            relevant=relevant,
+            confidence=round(min(1.0, max(0.0, score)), 3),
+            category=category,
+            tone=tone,
+            summary=compact_summary(publication.text or publication.title),
+            matched=rules.matched,
+            places=rules.places,
+            needs_review=needs_review,
+        )

@@ -1,0 +1,2318 @@
+{
+  "schema_version": 1,
+  "source_document": "Распредение по мониторингу РСК (3).docx",
+  "source_count": 158,
+  "counts_by_platform": {
+    "facebook": 6,
+    "instagram": 40,
+    "telegram": 41,
+    "threads": 9,
+    "tiktok": 5,
+    "vk": 6,
+    "website": 42,
+    "youtube": 9
+  },
+  "sources": [
+    {
+      "id": "website-kazakhstan-news",
+      "name": "Tengrinews",
+      "platform": "website",
+      "url": "https://tengrinews.kz/kazakhstan_news/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "лента новостей",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-zakon-kz",
+      "name": "Zakon.kz",
+      "platform": "website",
+      "url": "https://zakon.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-ru",
+      "name": "Kazinform",
+      "platform": "website",
+      "url": "https://inform.kz/ru",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "русская версия",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-kz",
+      "name": "Kazinform каз",
+      "platform": "website",
+      "url": "https://inform.kz/kz",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "казахская версия",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-nur-kz",
+      "name": "Nur.kz",
+      "platform": "website",
+      "url": "https://nur.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-орда",
+      "name": "Орда",
+      "platform": "website",
+      "url": "https://orda.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-qumash-kz",
+      "name": "Qumash.kz",
+      "platform": "website",
+      "url": "https://qumash.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-hronika-kz",
+      "name": "Hronika.kz",
+      "platform": "website",
+      "url": "https://hronika.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-toppress-kz",
+      "name": "Toppress.kz",
+      "platform": "website",
+      "url": "https://toppress.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-best-news",
+      "name": "Best news",
+      "platform": "website",
+      "url": "https://bestnews.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "проверять диагностикой",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-ru-2",
+      "name": "КазТаг",
+      "platform": "website",
+      "url": "https://kaztag.kz/ru/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-azattyq-ryh",
+      "name": "Azattyq Ryh",
+      "platform": "website",
+      "url": "https://rus.azattyq-ruhy.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-ratel",
+      "name": "Ratel",
+      "platform": "website",
+      "url": "https://ratel.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-спутник",
+      "name": "Спутник",
+      "platform": "website",
+      "url": "https://ru.sputnik.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-baigenews-kz",
+      "name": "BaigeNews.kz",
+      "platform": "website",
+      "url": "https://baigenews.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-голос-народа",
+      "name": "Голос народа",
+      "platform": "website",
+      "url": "https://golos-naroda.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": false,
+      "notes": "адрес требует ручной проверки",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-ru-3",
+      "name": "EL.KZ",
+      "platform": "website",
+      "url": "https://el.kz/ru/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-ru-4",
+      "name": "Inbusiness.kz",
+      "platform": "website",
+      "url": "https://inbusiness.kz/ru",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-вести",
+      "name": "Вести",
+      "platform": "website",
+      "url": "https://vesti.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-таим-кз",
+      "name": "Тайм КЗ",
+      "platform": "website",
+      "url": "https://time.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-тудеи-кз",
+      "name": "Тудей КЗ",
+      "platform": "website",
+      "url": "https://today.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": false,
+      "notes": "адрес требует ручной проверки",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-arna-press",
+      "name": "Arna press",
+      "platform": "website",
+      "url": "https://arnapress.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-аза-стан-д-у-р",
+      "name": "Қазақстан дәуірі",
+      "platform": "website",
+      "url": "https://qazdauiri.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-егемен-аза-стан",
+      "name": "Егемен Қазақстан",
+      "platform": "website",
+      "url": "https://egemen.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-казправда",
+      "name": "Казправда",
+      "platform": "website",
+      "url": "https://kazpravda.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-литер",
+      "name": "Литер",
+      "platform": "website",
+      "url": "https://liter.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-exclusive",
+      "name": "Exclusive",
+      "platform": "website",
+      "url": "https://exclusive.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-baq-kz",
+      "name": "Baq.kz",
+      "platform": "website",
+      "url": "https://rus.baq.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-лыс-медиа",
+      "name": "Ұлыс медиа",
+      "platform": "website",
+      "url": "https://ulysmedia.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-халы-н",
+      "name": "Халық үні",
+      "platform": "website",
+      "url": "https://halyq-uni.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": false,
+      "notes": "сайт был недоступен; оставить Telegram",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-азатты-радиосы",
+      "name": "Азаттық радиосы",
+      "platform": "website",
+      "url": "https://rus.azattyq.org/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-newtimes",
+      "name": "NewTimes",
+      "platform": "website",
+      "url": "https://newtimes.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-караван",
+      "name": "Караван",
+      "platform": "website",
+      "url": "https://caravan.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-feed",
+      "name": "Kazlenta.kz",
+      "platform": "website",
+      "url": "https://kazlenta.kz/feed/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "RSS",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "website-qaz365-kz",
+      "name": "Qaz365.kz",
+      "platform": "website",
+      "url": "https://qaz365.kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-1tveurasia",
+      "name": "Первый канал Евразия",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@1tveurasia",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-31kanal",
+      "name": "31 канал",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@31kanal",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-astanatv",
+      "name": "Астана телеканал",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@AstanaTV",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-qazaqstan-tv",
+      "name": "Qazaqstan TV",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@qazaqstan_tv",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "название Хабар в DOCX требует уточнения",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-tv24kz",
+      "name": "24 KZ",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@tv24kz",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-ktk-kz",
+      "name": "Телеканал КТК",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@ktk_kz",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "youtube-almatytv",
+      "name": "Алматы ТВ",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@almatytv",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "",
+      "aliases": [],
+      "docx_rows": []
+    },
+    {
+      "id": "instagram-sko-petropavl",
+      "name": "Sko_petropavl",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_petropavl/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        1
+      ]
+    },
+    {
+      "id": "instagram-petro-smi",
+      "name": "Petro_smi",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/petro_smi/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        2
+      ]
+    },
+    {
+      "id": "vk-petro-smi",
+      "name": "Petro_smi",
+      "platform": "vk",
+      "url": "https://vk.com/petro_smi/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        2
+      ]
+    },
+    {
+      "id": "instagram-sko-revizor",
+      "name": "Sko_revizor",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_revizor/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        3
+      ]
+    },
+    {
+      "id": "instagram-sko-vkurse",
+      "name": "Sko_vkurse",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_vkurse/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        4
+      ]
+    },
+    {
+      "id": "threads-sko-vkurse",
+      "name": "Sko_vkurse",
+      "platform": "threads",
+      "url": "https://threads.com/@sko_vkurse/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        4
+      ]
+    },
+    {
+      "id": "instagram-sko-kz",
+      "name": "Sko_kz",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_kz/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        5
+      ]
+    },
+    {
+      "id": "threads-sko-kz",
+      "name": "Sko_kz",
+      "platform": "threads",
+      "url": "https://threads.com/@sko_kz/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        5
+      ]
+    },
+    {
+      "id": "instagram-tipichka-petro",
+      "name": "Tipichka_petro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/tipichka_petro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        6
+      ]
+    },
+    {
+      "id": "vk-petropavlovsk-official",
+      "name": "Tipichka_petro",
+      "platform": "vk",
+      "url": "https://vk.com/petropavlovsk_official/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        6
+      ]
+    },
+    {
+      "id": "instagram-skoonline",
+      "name": "Skoonline",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/skoonline/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        7
+      ]
+    },
+    {
+      "id": "instagram-sko-vmeste",
+      "name": "Sko_vmeste",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_vmeste/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        8
+      ]
+    },
+    {
+      "id": "instagram-skopetro",
+      "name": "Skopetro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/skopetro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        9
+      ]
+    },
+    {
+      "id": "vk-skopetro",
+      "name": "Skopetro",
+      "platform": "vk",
+      "url": "https://vk.com/skopetro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        9
+      ]
+    },
+    {
+      "id": "threads-skopetro",
+      "name": "Skopetro",
+      "platform": "threads",
+      "url": "https://threads.com/@skopetro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        9
+      ]
+    },
+    {
+      "id": "instagram-rodnoy-petro",
+      "name": "Rodnoy_petro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/rodnoy_petro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        10
+      ]
+    },
+    {
+      "id": "threads-rodnoy-petro",
+      "name": "Rodnoy_petro",
+      "platform": "threads",
+      "url": "https://threads.com/@rodnoy_petro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        10
+      ]
+    },
+    {
+      "id": "instagram-rabota-novosti-sko",
+      "name": "Rabota_novosti_sko",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/rabota_novosti_sko/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        11
+      ]
+    },
+    {
+      "id": "instagram-bishkul-city",
+      "name": "Bishkul.city_",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/bishkul.city/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        12
+      ]
+    },
+    {
+      "id": "instagram-vpetropavlovske",
+      "name": "Vpetropavlovske",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/vpetropavlovske/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        13
+      ]
+    },
+    {
+      "id": "instagram-obovsempetropavlovsk",
+      "name": "Obovsempetropavlovsk",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/obovsempetropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        14
+      ]
+    },
+    {
+      "id": "vk-obovsempetropavlovsk",
+      "name": "Obovsempetropavlovsk",
+      "platform": "vk",
+      "url": "https://vk.com/obovsempetropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        14
+      ]
+    },
+    {
+      "id": "threads-obovsempetropavlovsk",
+      "name": "Obovsempetropavlovsk",
+      "platform": "threads",
+      "url": "https://threads.com/@obovsempetropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        14
+      ]
+    },
+    {
+      "id": "instagram-v-ritme-sko",
+      "name": "В ритме",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/v_ritme_sko/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        15
+      ]
+    },
+    {
+      "id": "instagram-pro-petropavlovsk",
+      "name": "PRO Петропавловск",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/pro_petropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        16
+      ]
+    },
+    {
+      "id": "instagram-petropavlovsk-city",
+      "name": "Petropavlovsk_city",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/petropavlovsk_city/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        17
+      ]
+    },
+    {
+      "id": "instagram-my-life-petropavlovsk",
+      "name": "My_life_petropavlovsk",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/my_life_petropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        18
+      ]
+    },
+    {
+      "id": "instagram-skolife",
+      "name": "Skolife",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/skolife_/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        19
+      ]
+    },
+    {
+      "id": "instagram-petro-fakt",
+      "name": "Petro_fakt",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/petro_fakt/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        20
+      ]
+    },
+    {
+      "id": "instagram-sko-inform",
+      "name": "Sko_inform",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_inform/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        21
+      ]
+    },
+    {
+      "id": "instagram-sko-sity",
+      "name": "Sko_sity",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_sity/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        22
+      ]
+    },
+    {
+      "id": "instagram-sko-gazeta",
+      "name": "Sko_gazeta",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/sko_gazeta/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        23
+      ]
+    },
+    {
+      "id": "threads-sko-gazeta",
+      "name": "Sko_gazeta",
+      "platform": "threads",
+      "url": "https://threads.com/@sko_gazeta/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        23
+      ]
+    },
+    {
+      "id": "instagram-trends-petro",
+      "name": "Trends.petro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/trends.petro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        24
+      ]
+    },
+    {
+      "id": "instagram-pomogaikapetropavlovsk",
+      "name": "Pomogaikapetropavlovsk",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/pomogaikapetropavlovsk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        25
+      ]
+    },
+    {
+      "id": "instagram-za-rulem-petro",
+      "name": "Za_rulem_petro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/za_rulem_petro/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        26
+      ]
+    },
+    {
+      "id": "vk-petropavlovsk-news",
+      "name": "Я ПЕТРОПАВЛОВСК",
+      "platform": "vk",
+      "url": "https://vk.com/petropavlovsk.news/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        27
+      ]
+    },
+    {
+      "id": "instagram-prospekt-sk",
+      "name": "Prospekt_sk",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/prospekt_sk/",
+      "scope": "local_public",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        28
+      ]
+    },
+    {
+      "id": "website-qz-media",
+      "name": "Qz_media",
+      "platform": "website",
+      "url": "https://qz-media.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        29
+      ]
+    },
+    {
+      "id": "instagram-qz-media",
+      "name": "Qz_media",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/qz_media/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        29
+      ]
+    },
+    {
+      "id": "website-qazmedia-kz",
+      "name": "Qazmedia.kz",
+      "platform": "website",
+      "url": "https://qaz-media.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        30
+      ]
+    },
+    {
+      "id": "instagram-qazmedia-kz",
+      "name": "Qazmedia.kz",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/qazmedia.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        30
+      ]
+    },
+    {
+      "id": "website-pkzsk",
+      "name": "Pkzsk",
+      "platform": "website",
+      "url": "https://pkzsk.info/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        31
+      ]
+    },
+    {
+      "id": "instagram-pkzsk",
+      "name": "Pkzsk",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/pkzsk/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        31
+      ]
+    },
+    {
+      "id": "vk-rexkz",
+      "name": "Pkzsk",
+      "platform": "vk",
+      "url": "https://vk.com/rexkz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        31
+      ]
+    },
+    {
+      "id": "website-7152-kz",
+      "name": "7152.kz",
+      "platform": "website",
+      "url": "https://7152.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        32
+      ]
+    },
+    {
+      "id": "instagram-7152-kz",
+      "name": "7152.kz",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/7152.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        32
+      ]
+    },
+    {
+      "id": "threads-7152-kz",
+      "name": "7152.kz",
+      "platform": "threads",
+      "url": "https://threads.com/@7152.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        32
+      ]
+    },
+    {
+      "id": "website-см1-social-media",
+      "name": "СМ1 Social_media",
+      "platform": "website",
+      "url": "https://sm1.kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        33
+      ]
+    },
+    {
+      "id": "instagram-social-media-kz",
+      "name": "СМ1 Social_media",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/social_media_kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        33
+      ]
+    },
+    {
+      "id": "facebook-groups",
+      "name": "СМ1 Social_media",
+      "platform": "facebook",
+      "url": "https://facebook.com/groups/petropedrug/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        33
+      ]
+    },
+    {
+      "id": "threads-social-media-kz",
+      "name": "СМ1 Social_media",
+      "platform": "threads",
+      "url": "https://threads.com/@social_media_kz/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        33
+      ]
+    },
+    {
+      "id": "website-ru-5",
+      "name": "МТРК",
+      "platform": "website",
+      "url": "https://mtrk.kz/ru/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "instagram-mtrk-sko",
+      "name": "МТРК",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/mtrk.sko/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "instagram-kaz-mtrk",
+      "name": "МТРК",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/kaz.mtrk/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "facebook-mtrk-kz",
+      "name": "МТРК",
+      "platform": "facebook",
+      "url": "https://facebook.com/mtrk.kz",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "facebook-sko-mtrk",
+      "name": "МТРК",
+      "platform": "facebook",
+      "url": "https://facebook.com/sko.mtrk/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "threads-mtrk-sko",
+      "name": "МТРК",
+      "platform": "threads",
+      "url": "https://threads.com/@mtrk.sko/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "youtube-toomtrk",
+      "name": "МТРК",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@TOOMTRK",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        34
+      ]
+    },
+    {
+      "id": "website-ru-6",
+      "name": "Qyzyljartv",
+      "platform": "website",
+      "url": "https://qyzyljartv.kz/ru",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        35
+      ]
+    },
+    {
+      "id": "instagram-qyzyljartv",
+      "name": "Qyzyljartv",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/qyzyljartv/",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        35
+      ]
+    },
+    {
+      "id": "facebook-1664914567057010",
+      "name": "Qyzyljartv",
+      "platform": "facebook",
+      "url": "https://facebook.com/1664914567057010",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        35
+      ]
+    },
+    {
+      "id": "youtube-qyzyljartv1778",
+      "name": "Qyzyljartv",
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@qyzyljartv1778",
+      "scope": "regional",
+      "workflow": "regional_news",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        35
+      ]
+    },
+    {
+      "id": "telegram-tengrinews",
+      "name": "Tengrinews",
+      "platform": "telegram",
+      "url": "https://t.me/tengrinews/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        36
+      ]
+    },
+    {
+      "id": "telegram-orda-kz",
+      "name": "Orda",
+      "platform": "telegram",
+      "url": "https://t.me/orda_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        37
+      ]
+    },
+    {
+      "id": "telegram-newsnurkz",
+      "name": "NUR.KZ",
+      "platform": "telegram",
+      "url": "https://t.me/newsnurkz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        38
+      ]
+    },
+    {
+      "id": "telegram-arbatmediakz",
+      "name": "Arbat.media",
+      "platform": "telegram",
+      "url": "https://t.me/arbatmediakz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        39
+      ]
+    },
+    {
+      "id": "telegram-ulysmediatg",
+      "name": "Ulysmedia",
+      "platform": "telegram",
+      "url": "https://t.me/ulysmediatg/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [
+        "ВЫХОД К ПРАВДЕ"
+      ],
+      "docx_rows": [
+        40,
+        73
+      ]
+    },
+    {
+      "id": "telegram-ztb-qaz",
+      "name": "Ztb",
+      "platform": "telegram",
+      "url": "https://t.me/ztb_qaz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [
+        "ZTB NEWS"
+      ],
+      "docx_rows": [
+        41,
+        72
+      ]
+    },
+    {
+      "id": "telegram-kaztag-tg",
+      "name": "Kaztag_tg",
+      "platform": "telegram",
+      "url": "https://t.me/kaztag_tg/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        42
+      ]
+    },
+    {
+      "id": "telegram-kazinform-news",
+      "name": "Казинформ",
+      "platform": "telegram",
+      "url": "https://t.me/kazinform_news/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        43
+      ]
+    },
+    {
+      "id": "telegram-egovpress",
+      "name": "EGOV.Press",
+      "platform": "telegram",
+      "url": "https://t.me/egovpress/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        44
+      ]
+    },
+    {
+      "id": "telegram-jexenews",
+      "name": "JexeNews",
+      "platform": "telegram",
+      "url": "https://t.me/jexenews/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [
+        "JexeNews"
+      ],
+      "docx_rows": [
+        45,
+        80
+      ]
+    },
+    {
+      "id": "telegram-obozhau1",
+      "name": "ОБОЖАЮ",
+      "platform": "telegram",
+      "url": "https://t.me/obozhau1/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        46
+      ]
+    },
+    {
+      "id": "telegram-informburo-kz",
+      "name": "Informburo",
+      "platform": "telegram",
+      "url": "https://t.me/informburo_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        47
+      ]
+    },
+    {
+      "id": "telegram-zakonkz",
+      "name": "Zakon",
+      "platform": "telegram",
+      "url": "https://t.me/zakonkz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        48
+      ]
+    },
+    {
+      "id": "telegram-sputnikkz",
+      "name": "Sputnik",
+      "platform": "telegram",
+      "url": "https://t.me/sputnikKZ/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        49
+      ]
+    },
+    {
+      "id": "telegram-zanamiviehali",
+      "name": "За нами уже выехали",
+      "platform": "telegram",
+      "url": "https://t.me/Zanamiviehali/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [
+        "За нами уже выехали"
+      ],
+      "docx_rows": [
+        50,
+        58
+      ]
+    },
+    {
+      "id": "telegram-kozachkow",
+      "name": "Kozachkov offside",
+      "platform": "telegram",
+      "url": "https://t.me/kozachkow/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        51
+      ]
+    },
+    {
+      "id": "telegram-azattyq",
+      "name": "Azattyq ryhy",
+      "platform": "telegram",
+      "url": "https://t.me/azattyq/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        52
+      ]
+    },
+    {
+      "id": "telegram-letterskz",
+      "name": "Письма Президенту",
+      "platform": "telegram",
+      "url": "https://t.me/letterskz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        53
+      ]
+    },
+    {
+      "id": "telegram-nehabar",
+      "name": "НЕХабар",
+      "platform": "telegram",
+      "url": "https://t.me/nehabar/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        54
+      ]
+    },
+    {
+      "id": "telegram-chinovnik-kz",
+      "name": "Чиновник",
+      "platform": "telegram",
+      "url": "https://t.me/chinovnik_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        55
+      ]
+    },
+    {
+      "id": "telegram-holanewskz",
+      "name": "Hola news",
+      "platform": "telegram",
+      "url": "https://t.me/holanewskz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        56
+      ]
+    },
+    {
+      "id": "telegram-bessimptomno",
+      "name": "Bes.media",
+      "platform": "telegram",
+      "url": "https://t.me/bessimptomno/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        57
+      ]
+    },
+    {
+      "id": "telegram-kz-press",
+      "name": "Press.kz",
+      "platform": "telegram",
+      "url": "https://t.me/kz_press/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        59
+      ]
+    },
+    {
+      "id": "telegram-liternews",
+      "name": "Liter.kz",
+      "platform": "telegram",
+      "url": "https://t.me/liternews/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        60
+      ]
+    },
+    {
+      "id": "telegram-myviewkz",
+      "name": "Взгляд.кз",
+      "platform": "telegram",
+      "url": "https://t.me/myviewkz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        61
+      ]
+    },
+    {
+      "id": "telegram-kursivm",
+      "name": "Kursiv.Media",
+      "platform": "telegram",
+      "url": "https://t.me/kursivm/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [
+        "Kursiv.Media"
+      ],
+      "docx_rows": [
+        62,
+        67
+      ]
+    },
+    {
+      "id": "telegram-villagekazakhstan",
+      "name": "The Village Казахстан",
+      "platform": "telegram",
+      "url": "https://t.me/villagekazakhstan/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        63
+      ]
+    },
+    {
+      "id": "telegram-qazaqparat-kz",
+      "name": "Qazaqparat",
+      "platform": "telegram",
+      "url": "https://t.me/QazAqparat_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        64
+      ]
+    },
+    {
+      "id": "telegram-elinfo-kz",
+      "name": "EL.INFO",
+      "platform": "telegram",
+      "url": "https://t.me/elinfo_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        65
+      ]
+    },
+    {
+      "id": "telegram-tv24kz-kaz",
+      "name": "24KZ",
+      "platform": "telegram",
+      "url": "https://t.me/tv24kz_kaz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        66
+      ]
+    },
+    {
+      "id": "telegram-astana-arnasy",
+      "name": "AstanaTV",
+      "platform": "telegram",
+      "url": "https://t.me/astana_arnasy/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        68
+      ]
+    },
+    {
+      "id": "telegram-eurasia1tvkz",
+      "name": "Первый канал Евразия",
+      "platform": "telegram",
+      "url": "https://t.me/eurasia1tvkz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        69
+      ]
+    },
+    {
+      "id": "telegram-vlastkz",
+      "name": "Власть",
+      "platform": "telegram",
+      "url": "https://t.me/vlastkz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        70
+      ]
+    },
+    {
+      "id": "telegram-halyqstan",
+      "name": "HALYQSTAN",
+      "platform": "telegram",
+      "url": "https://t.me/halyqstan/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        71
+      ]
+    },
+    {
+      "id": "telegram-qumash-kz",
+      "name": "Qumash",
+      "platform": "telegram",
+      "url": "https://t.me/qumash_kz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        74
+      ]
+    },
+    {
+      "id": "telegram-besh1",
+      "name": "Besh",
+      "platform": "telegram",
+      "url": "https://t.me/besh1/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        75
+      ]
+    },
+    {
+      "id": "telegram-basekz",
+      "name": "БАСЕ",
+      "platform": "telegram",
+      "url": "https://t.me/basekz/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        76
+      ]
+    },
+    {
+      "id": "telegram-gosrating",
+      "name": "ПИСЬМА ПРЕЗИДЕНТУ",
+      "platform": "telegram",
+      "url": "https://t.me/gosrating/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        77
+      ]
+    },
+    {
+      "id": "telegram-hacknazararnasy",
+      "name": "Haqnazar Arnasy",
+      "platform": "telegram",
+      "url": "https://t.me/hacknazararnasy/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        78
+      ]
+    },
+    {
+      "id": "telegram-yedilov-online",
+      "name": "YEDILOV online",
+      "platform": "telegram",
+      "url": "https://t.me/yedilov_online/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        79
+      ]
+    },
+    {
+      "id": "telegram-negemedia",
+      "name": "Nege.kz",
+      "platform": "telegram",
+      "url": "https://t.me/negemedia/",
+      "scope": "republican",
+      "workflow": "sko_mentions",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        81
+      ]
+    },
+    {
+      "id": "instagram-osdp-sko-petro",
+      "name": "osdp.sko.petro",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/osdp.sko.petro/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        82
+      ]
+    },
+    {
+      "id": "instagram-tolegenimanov",
+      "name": "Толеген Иманов Законопослушный гражданин",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/tolegenimanov/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        83
+      ]
+    },
+    {
+      "id": "facebook-groups-2",
+      "name": "Толеген Иманов Законопослушный гражданин",
+      "platform": "facebook",
+      "url": "https://facebook.com/groups/264599967818925",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        83
+      ]
+    },
+    {
+      "id": "tiktok-ergali-aga",
+      "name": "Ергали Копеев",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@ergali_aga_/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        84
+      ]
+    },
+    {
+      "id": "tiktok-bakyt-kazbekova",
+      "name": "Бахыт Казбекова",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@bakyt_kazbekova/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        85
+      ]
+    },
+    {
+      "id": "tiktok-zhanat-omar12",
+      "name": "Жанат Омарулы",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@zhanat.omar12/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        86
+      ]
+    },
+    {
+      "id": "instagram-mk-ablyazov",
+      "name": "Аблязов Мухтар",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/mk.ablyazov/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        87
+      ]
+    },
+    {
+      "id": "instagram-nurbolonerhan",
+      "name": "Нурбол Онерхан",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/nurbolonerhan/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        88
+      ]
+    },
+    {
+      "id": "facebook-nurbol-onerhan",
+      "name": "Нурбол Онерхан",
+      "platform": "facebook",
+      "url": "https://facebook.com/nurbol.onerhan",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        88
+      ]
+    },
+    {
+      "id": "tiktok-nurbol-onerhan",
+      "name": "Нурбол Онерхан",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@nurbol.onerhan/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        88
+      ]
+    },
+    {
+      "id": "instagram-vadimkuramshininfo",
+      "name": "Вадим Курамшин",
+      "platform": "instagram",
+      "url": "https://www.instagram.com/vadimkuramshininfo/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        89
+      ]
+    },
+    {
+      "id": "tiktok-jan-aikai",
+      "name": "Jan_aikai",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@jan_aikai/",
+      "scope": "civic_watch",
+      "workflow": "akimat_negative",
+      "owners": [],
+      "enabled": true,
+      "notes": "из рабочего списка РСК",
+      "aliases": [],
+      "docx_rows": [
+        90
+      ]
+    }
+  ]
+}
