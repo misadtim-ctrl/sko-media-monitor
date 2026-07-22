@@ -68,7 +68,9 @@ jobs:
           ENABLE_SEMANTIC: "true"
           ENABLE_MEDIA_ANALYSIS: "true"
           ENABLE_VIDEO_ANALYSIS: "false"
+          SOURCE_REGISTRY: config/sources.json
           STATE_DB: data/state.sqlite3
+          EXPORT_DIR: exports
         run: sko-monitor run --mode negative --lookback-hours 72
 
       - name: Keep only the latest export for diagnostics

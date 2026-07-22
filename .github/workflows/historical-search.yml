@@ -62,6 +62,8 @@ jobs:
           APPS_SCRIPT_WEBHOOK_URL: ${{ secrets.APPS_SCRIPT_WEBHOOK_URL }}
           MONITOR_WEBHOOK_SECRET: ${{ secrets.MONITOR_WEBHOOK_SECRET }}
           CONCURRENCY: "8"
+          SOURCE_REGISTRY: config/sources.json
+          EXPORT_DIR: exports
         run: |
           sko-monitor search \
             --query "$QUERY" \

@@ -9,7 +9,13 @@ from .models import Source
 
 
 def project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    working_directory = Path.cwd().resolve()
+    if (working_directory / "config" / "sources.json").is_file():
+        return working_directory
+    source_checkout = Path(__file__).resolve().parents[2]
+    if (source_checkout / "config" / "sources.json").is_file():
+        return source_checkout
+    return working_directory
 
 
 @dataclass(slots=True, frozen=True)
