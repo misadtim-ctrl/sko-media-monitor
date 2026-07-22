@@ -20,11 +20,14 @@ class PublicationAnalyzer:
             category = rules.category if rules.score else "возможная жалоба"
             tone = "негативная" if relevant or needs_review else "нейтральная"
         elif publication.workflow == "sko_mentions":
-            rules = score_sko(text)
+            # Semantic similarity identifies subject matter, not geography. A
+            # publication may be about the same kind of event in Pavlodar or
+            # Almaty, so only explicit SKO evidence can authorize delivery.
+            rules = score_sko(publication.geographic_text())
             semantic = self.semantic.score(publication.workflow, text)
-            score = max(rules.score, semantic)
-            relevant = rules.score >= 0.72 or semantic >= 0.64
-            needs_review = not relevant and score >= 0.52
+            relevant = rules.score >= 0.72
+            needs_review = not relevant and semantic >= 0.72
+            score = rules.score if relevant else min(semantic, 0.49)
             category = "упоминание СКО"
             negative = score_negative(text)
             tone = "негативная" if negative.score >= 0.58 else "нейтральная"

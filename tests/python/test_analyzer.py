@@ -33,6 +33,25 @@ def test_kamchatka_is_not_sko() -> None:
     assert not result.relevant
 
 
+def test_semantic_similarity_cannot_replace_sko_geography() -> None:
+    class AlwaysSimilar:
+        @staticmethod
+        def score(_workflow: str, _text: str) -> float:
+            return 0.99
+
+    result = PublicationAnalyzer(AlwaysSimilar()).analyze(
+        item("sko_mentions", "В Павлодарской области открыли новую школу")
+    )
+    assert not result.relevant
+    assert result.needs_review
+    assert result.confidence < 0.5
+
+
+def test_other_region_does_not_cancel_explicit_sko_mention() -> None:
+    result = analyzer.analyze(item("sko_mentions", "Шторм ожидается в Павлодарской области и СКО"))
+    assert result.relevant
+
+
 def test_akimat_road_complaint_is_negative() -> None:
     result = analyzer.analyze(
         item("akimat_negative", "Жители жалуются на разбитую дорогу и просят акимат принять меры")

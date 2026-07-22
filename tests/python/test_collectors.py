@@ -4,7 +4,7 @@ import respx
 
 from sko_monitor.collectors.telegram import TelegramCollector
 from sko_monitor.collectors.website import WebsiteCollector
-from sko_monitor.models import Source
+from sko_monitor.models import Publication, Source
 
 
 @pytest.mark.asyncio
@@ -43,3 +43,44 @@ async def test_website_rss() -> None:
     assert len(result) == 1
     assert result[0].published_at is not None
     assert result[0].text == "Новый объект начал работу"
+
+
+def test_article_hydration_ignores_related_news_geography() -> None:
+    publication = Publication(
+        source_id="web",
+        source_name="Example",
+        platform="website",
+        workflow="sko_mentions",
+        url="https://example.kz/news/pavlodar",
+        title="В Павлодарской области прошел ураган",
+    )
+    html = """
+    <article>
+      <p>Сильный ветер повредил несколько домов в Павлодарской области.</p>
+      <div class="related-news">В СКО спасатели укрепили дамбу</div>
+    </article>
+    """
+    WebsiteCollector._hydrate_article(publication, html)
+    assert "Павлодарской" in publication.text
+    assert "СКО" not in publication.text
+
+
+def test_article_hydration_prefers_structured_article_body() -> None:
+    publication = Publication(
+        source_id="web",
+        source_name="Example",
+        platform="website",
+        workflow="sko_mentions",
+        url="https://example.kz/news/petropavl",
+        title="Рабочая поездка",
+    )
+    html = """
+    <script type="application/ld+json">
+      {"@type":"NewsArticle","articleBody":"В Петропавловске открыли школу.",
+       "datePublished":"2026-07-22T08:00:00+05:00"}
+    </script>
+    <article><p>Короткая версия.</p></article>
+    """
+    WebsiteCollector._hydrate_article(publication, html)
+    assert publication.text == "В Петропавловске открыли школу."
+    assert publication.published_at is not None

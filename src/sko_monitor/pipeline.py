@@ -163,7 +163,9 @@ class MonitorPipeline:
                         report.relevant += 1
                     if analysis.needs_review:
                         report.needs_review += 1
-                    direct_delivery = telegram.configured_for(publication.workflow)
+                    direct_delivery = self.settings.enable_delivery and telegram.configured_for(
+                        publication.workflow
+                    )
                     if direct_delivery and self.state.enqueue(
                         payload_id(publication), publication.workflow, payload
                     ):
@@ -171,14 +173,16 @@ class MonitorPipeline:
                     pending_memory.append((keys, publication.source_id, direct_delivery))
 
             bridge_accepted = False
-            if report.results:
+            if report.results and self.settings.enable_delivery:
                 bridge_accepted = await sheets.publish(report.results)
+            if report.results:
                 export_latest(report.results, self.settings.export_dir)
             for keys, source_id, direct_delivery in pending_memory:
                 if bridge_accepted or direct_delivery:
                     self.state.remember(keys, source_id, ttl_days=365)
-            report.sent = await self._flush_outbox(telegram)
-            await sheets.heartbeat(report.to_dict())
+            if self.settings.enable_delivery:
+                report.sent = await self._flush_outbox(telegram)
+                await sheets.heartbeat(report.to_dict())
 
         self.state.prune()
         return report

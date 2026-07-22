@@ -38,6 +38,12 @@ class Publication:
         parts.extend(str(self.metadata.get(key, "")) for key in ("ocr_text", "transcript"))
         return "\n".join(part.strip() for part in parts if part and part.strip())
 
+    def geographic_text(self) -> str:
+        """Text allowed to prove geography for automatic channel delivery."""
+        parts = [self.title, self.text[:4000]]
+        parts.extend(str(self.metadata.get(key, ""))[:4000] for key in ("ocr_text", "transcript"))
+        return "\n".join(part.strip() for part in parts if part and part.strip())
+
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         if self.published_at:

@@ -33,6 +33,7 @@ class Settings:
     webhook_secret: str
     semantic_model: str
     enable_semantic: bool
+    enable_delivery: bool
     enable_media_analysis: bool
     enable_video_analysis: bool
     instagram_username: str
@@ -64,6 +65,7 @@ class Settings:
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             ),
             enable_semantic=_bool_env("ENABLE_SEMANTIC", False),
+            enable_delivery=_bool_env("ENABLE_DELIVERY", True),
             enable_media_analysis=_bool_env("ENABLE_MEDIA_ANALYSIS", False),
             enable_video_analysis=_bool_env("ENABLE_VIDEO_ANALYSIS", False),
             instagram_username=os.getenv("INSTAGRAM_USERNAME", "").strip(),

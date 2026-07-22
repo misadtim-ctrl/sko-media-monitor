@@ -3399,6 +3399,31 @@ function handleExternalHeartbeat_(payload) {
   return { ok: true, received_at: new Date().toISOString() };
 }
 
+function stopExternalMainDelivery_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+
+  var sh = telegramQueueSheet_();
+  var cancelled = 0;
+  if (sh.getLastRow() >= 2) {
+    var rows = sh.getRange(2, 1, sh.getLastRow() - 1, TG_QUEUE_HEADERS.length).getValues();
+    rows.forEach(function(r, index) {
+      var state = String(r[3] || 'pending');
+      var flow = String(r[11] || '');
+      if (flow !== 'sko_mentions' || (state !== 'pending' && state !== 'retry' && state !== 'sending')) return;
+      sh.getRange(index + 2, 3, 1, 4).setValues([[new Date(), 'cancelled', r[4] || 0, '']]);
+      sh.getRange(index + 2, 15).setValue('Отменено: внешний фильтр остановлен');
+      cancelled++;
+    });
+  }
+  props.setProperty('PY_MONITOR_ACTIVE', '0');
+  skoLog_('Python мост остановлен', 'Отменено сообщений: ' + cancelled);
+  return { ok: true, cancelled: cancelled };
+}
+
 function handleHistoricalResults_(payload) {
   var props = PropertiesService.getScriptProperties();
   var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
@@ -3456,6 +3481,7 @@ function doPost(e) {
     if (upd && upd.action === 'ingest') return jsonOutput_(handleExternalIngest_(upd));
     if (upd && upd.action === 'heartbeat') return jsonOutput_(handleExternalHeartbeat_(upd));
     if (upd && upd.action === 'historical') return jsonOutput_(handleHistoricalResults_(upd));
+    if (upd && upd.action === 'stop_external_main') return jsonOutput_(stopExternalMainDelivery_(upd));
 
     // ЗАЩИТА ОТ ПОВТОРОВ: Telegram ретраит команду, если вебхук отвечает
     // медленно (наши проверки идут 1-3 мин). Помним ID обработанных
