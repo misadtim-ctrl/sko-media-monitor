@@ -2796,6 +2796,51 @@ function setupMonitorBridge() {
   );
 }
 
+// Служебная настройка через Apps Script Execution API. Она доступна только
+// владельцу проекта (executionApi.access = MYSELF) и не раскрывает токен бота.
+function configureDeploymentBridge(secret, webAppUrl) {
+  secret = String(secret || '').trim();
+  webAppUrl = String(webAppUrl || '').trim();
+  if (!/^[A-Za-z0-9_-]{48,128}$/.test(secret)) {
+    throw new Error('Некорректный секрет моста.');
+  }
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(webAppUrl)) {
+    throw new Error('Некорректный адрес веб-приложения.');
+  }
+
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty('MONITOR_WEBHOOK_SECRET', secret);
+  props.setProperty('PY_MONITOR_ACTIVE', '1');
+
+  var token = props.getProperty('TG_TOKEN');
+  var webhookOk = false;
+  var webhookError = '';
+  if (token) {
+    try {
+      var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/setWebhook', {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify({ url: webAppUrl, allowed_updates: ['message'] }),
+        muteHttpExceptions: true
+      });
+      var parsed = JSON.parse(response.getContentText() || '{}');
+      webhookOk = response.getResponseCode() === 200 && parsed.ok === true;
+      webhookError = webhookOk ? '' : (parsed.description || ('HTTP ' + response.getResponseCode()));
+    } catch (e) {
+      webhookError = e.message || String(e);
+    }
+  }
+
+  skoLog_('Развёртывание', 'Python мост настроен; TG webhook: ' + (webhookOk ? 'OK' : webhookError || 'нет токена'));
+  return {
+    ok: true,
+    webAppUrl: webAppUrl,
+    telegramConfigured: !!token,
+    telegramWebhookOk: webhookOk,
+    telegramError: webhookError
+  };
+}
+
 function disableTelegram() {
   var props = PropertiesService.getScriptProperties();
   props.deleteProperty('TG_TOKEN');
