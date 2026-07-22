@@ -123,3 +123,16 @@ def test_unrelated_local_ad_is_not_negative() -> None:
     result = analyzer.analyze(item("akimat_negative", "Сегодня скидка на новую коллекцию одежды"))
     assert not result.relevant
     assert not result.needs_review
+
+
+def test_semantic_similarity_cannot_publish_negative_without_rules() -> None:
+    class AlwaysSimilar:
+        @staticmethod
+        def score(_workflow: str, _text: str) -> float:
+            return 0.99
+
+    result = PublicationAnalyzer(AlwaysSimilar()).analyze(
+        item("akimat_negative", "В городе открылась новая кофейня")
+    )
+    assert not result.relevant
+    assert result.needs_review

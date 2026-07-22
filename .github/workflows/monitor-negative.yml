@@ -66,10 +66,11 @@ jobs:
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v22.0' }}
           ENABLE_SEMANTIC: "true"
+          ENABLE_DELIVERY: "false"
           ENABLE_MEDIA_ANALYSIS: "true"
           ENABLE_VIDEO_ANALYSIS: "false"
           SOURCE_REGISTRY: config/sources.json
-          STATE_DB: data/state.sqlite3
+          STATE_DB: data/shadow-negative.sqlite3
           EXPORT_DIR: exports
         run: sko-monitor run --mode negative --lookback-hours 72
 

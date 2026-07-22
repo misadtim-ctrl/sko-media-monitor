@@ -65,5 +65,6 @@ assert.match(code, /enqueueTelegramFindings_\(findings, headerLabel\);\s*flushTe
 assert.doesNotMatch(code, /tgSeen\[gk\]/, 'Channel dedupe must not suppress another publisher globally');
 assert.match(code, /function enableAutoCheckSilent_\(\)/);
 assert.doesNotMatch(code, /newTrigger\('makeWeeklyBackup_'\)/, 'Publication archive backups stay disabled');
+assert.match(code, /confirmedNegative\.map\(function\(x\) \{ return x\.finding; \}\)/);
 
 console.log('Apps Script core tests: OK');

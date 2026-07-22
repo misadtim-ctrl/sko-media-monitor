@@ -15,8 +15,10 @@ class PublicationAnalyzer:
             rules = score_negative(text)
             semantic = self.semantic.score(publication.workflow, text)
             score = max(rules.score, semantic)
-            relevant = rules.score >= 0.58 or semantic >= 0.60
-            needs_review = not relevant and score >= 0.48
+            # Meaning similarity may help an analyst inspect a candidate, but
+            # it must never turn ordinary local content into a channel alert.
+            relevant = rules.score >= 0.58
+            needs_review = not relevant and semantic >= 0.72
             category = rules.category if rules.score else "возможная жалоба"
             tone = "негативная" if relevant or needs_review else "нейтральная"
         elif publication.workflow == "sko_mentions":

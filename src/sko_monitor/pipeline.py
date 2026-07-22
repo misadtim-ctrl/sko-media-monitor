@@ -169,6 +169,7 @@ class MonitorPipeline:
                     direct_delivery = (
                         self.settings.enable_delivery
                         and allow_python_main
+                        and analysis.relevant
                         and telegram.configured_for(publication.workflow)
                     )
                     if direct_delivery and self.state.enqueue(

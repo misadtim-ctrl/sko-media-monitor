@@ -3359,7 +3359,10 @@ function handleExternalIngest_(payload) {
   }
   if (negative.length) {
     writeDailyMonitorRows_(negative.map(function(x) { return x.item; }));
-    enqueueTelegramFindings_(negative.map(function(x) { return x.finding; }), 'akimat_negative');
+    var confirmedNegative = negative.filter(function(x) {
+      return !(x.item.analysis && x.item.analysis.needs_review);
+    });
+    enqueueTelegramFindings_(confirmedNegative.map(function(x) { return x.finding; }), 'akimat_negative');
   }
   saveSeenSheet_('_ПАМЯТЬ_МОСТА', bridgeSeen);
   flushTelegramQueue_();
