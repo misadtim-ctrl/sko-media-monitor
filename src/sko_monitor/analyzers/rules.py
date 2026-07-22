@@ -340,6 +340,84 @@ COMPLAINT_MARKERS = (
     "шара қолдан",
 )
 
+# A topic word alone is not a complaint.  These are symptoms that can stand on
+# their own in a short social post, even when the author did not use "жалоба".
+DIRECT_ISSUE_MARKERS = (
+    "ямы",
+    "яма",
+    "разбит",
+    "бездорож",
+    "не чистят снег",
+    "гололед",
+    "шұңқыр",
+    "жол нашар",
+    "нет воды",
+    "без воды",
+    "отключили воду",
+    "прорыв",
+    "затопило подвал",
+    "нет отопления",
+    "холодные батареи",
+    "нет света",
+    "отключение электр",
+    "аварийные сети",
+    "су жоқ",
+    "жарық жоқ",
+    "жылу жоқ",
+    "свалка",
+    "не вывозят",
+    "вонь",
+    "нет освещения",
+    "фонари не горят",
+    "разбитая площадка",
+    "қоқыс",
+    "бродячие собак",
+    "бездомные собак",
+    "собаки напали",
+    "стая собак",
+    "қаңғыбас ит",
+    "ит қапты",
+    "паводок",
+    "подтоплен",
+    "затопило",
+    "талая вода",
+    "вода во дворе",
+    "дамба",
+    "наводнен",
+    "су басты",
+    "тасқын",
+    "автобус не",
+    "нет автобуса",
+    "переполненный автобус",
+    "автобус жүрмейді",
+    "дым",
+    "выброс",
+    "загрязнен",
+    "неприятный запах",
+    "мертвая рыба",
+    "вырубка",
+    "ауа ластан",
+)
+
+# "Пожарно-спасательный спорт" is not a fire.  Event patterns deliberately
+# use word boundaries so that educational and sports news is not alerted.
+INCIDENT_PATTERNS = (
+    re.compile(r"\bдтп\b"),
+    re.compile(r"\bавари(?:я|и|ю|ей)\b"),
+    re.compile(r"\bпожар(?:а|е|и|ом|у|ы)?\b"),
+    re.compile(r"\bвозгора\w*"),
+    re.compile(r"\bпогиб\w*"),
+    re.compile(r"\bпострадал\w*"),
+    re.compile(r"\bобрушен\w*"),
+    re.compile(r"\bнападен\w*"),
+    re.compile(r"\bдрак\w*"),
+    re.compile(r"\bтравм\w*"),
+    re.compile(r"\bпропал\w*"),
+    re.compile(r"\bэвакуац\w*"),
+    re.compile(r"\bапат\w*"),
+    re.compile(r"\bөрт\w*"),
+)
+
 
 @dataclass(slots=True)
 class RuleScore:
@@ -410,11 +488,19 @@ def score_negative(text: str) -> RuleScore:
         if hits:
             category_scores[category] = len(hits)
             matched.extend(hits)
+    incident_hits = [pattern.pattern for pattern in INCIDENT_PATTERNS if pattern.search(low)]
+    if "происшествие" in category_scores and not incident_hits:
+        category_scores.pop("происшествие")
+        matched = [marker for marker in matched if marker not in NEGATIVE_CATEGORIES["происшествие"]]
     if not category_scores:
         return RuleScore(0.0, "прочее", [], [])
     category = max(category_scores, key=category_scores.get)
     complaint_hits = [marker for marker in COMPLAINT_MARKERS if marker in low]
+    direct_issue_hits = [marker for marker in DIRECT_ISSUE_MARKERS if marker in low]
     matched.extend(complaint_hits)
+    matched.extend(direct_issue_hits)
+    if category != "происшествие" and not (complaint_hits or direct_issue_hits):
+        return RuleScore(0.42, category, list(dict.fromkeys(matched))[:8], score_sko(text).places)
     base = 0.62 if category == "происшествие" else 0.58
     score = min(
         0.98,

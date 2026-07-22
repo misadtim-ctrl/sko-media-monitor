@@ -125,6 +125,37 @@ def test_unrelated_local_ad_is_not_negative() -> None:
     assert not result.needs_review
 
 
+def test_fire_sports_news_is_not_an_incident() -> None:
+    result = analyzer.analyze(
+        item(
+            "akimat_negative",
+            "Команда ДЧС СКО стала призером Кубка МЧС по пожарно-спасательному спорту",
+        )
+    )
+    assert not result.relevant
+
+
+def test_utility_modernisation_without_complaint_is_not_negative() -> None:
+    result = analyzer.analyze(
+        item(
+            "akimat_negative",
+            "В Петропавловске обсудили модернизацию коммунальной инфраструктуры и канализации",
+        )
+    )
+    assert not result.relevant
+
+
+def test_actual_fire_is_an_incident() -> None:
+    result = analyzer.analyze(
+        item(
+            "akimat_negative",
+            "В Уалихановском районе при пожаре выгорело 45 гектаров степи",
+        )
+    )
+    assert result.relevant
+    assert result.category == "происшествие"
+
+
 def test_semantic_similarity_cannot_publish_negative_without_rules() -> None:
     class AlwaysSimilar:
         @staticmethod
