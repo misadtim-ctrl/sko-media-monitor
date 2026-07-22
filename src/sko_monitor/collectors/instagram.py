@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from ..config import Settings
 from ..models import Publication, Source
 from .base import Collector, CollectorError
-from .parsing import parse_datetime
+from .parsing import compact_title, parse_datetime
 
 
 class InstagramCollector(Collector):
@@ -69,7 +69,7 @@ class InstagramCollector(Collector):
                     platform=source.platform,
                     workflow=source.workflow,
                     url=permalink,
-                    title=(caption[:180] + "…") if len(caption) > 180 else caption or "Публикация Instagram",
+                    title=compact_title(caption) if caption else "Публикация Instagram",
                     text=caption,
                     published_at=parse_datetime(post.get("timestamp")),
                     media_urls=list(dict.fromkeys(media_urls)),
@@ -134,9 +134,7 @@ class InstagramCollector(Collector):
                         platform=source.platform,
                         workflow=source.workflow,
                         url=f"https://www.instagram.com/p/{post.shortcode}/",
-                        title=(caption[:180] + "…")
-                        if len(caption) > 180
-                        else caption or "Публикация Instagram",
+                        title=compact_title(caption) if caption else "Публикация Instagram",
                         text=caption,
                         published_at=post.date_utc.replace(tzinfo=UTC),
                         media_urls=list(dict.fromkeys(media_urls))[:2],

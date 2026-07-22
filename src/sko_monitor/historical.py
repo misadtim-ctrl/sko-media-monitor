@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
@@ -14,6 +15,8 @@ from .analyzers.semantic import SemanticScorer
 from .collectors.parsing import parse_datetime
 from .config import Settings, load_sources
 from .dedupe import canonical_url
+
+LOGGER = logging.getLogger("sko_monitor.historical")
 
 
 @dataclass(slots=True)
@@ -55,11 +58,15 @@ class HistoricalSearcher:
             semaphore = asyncio.Semaphore(self.settings.concurrency)
 
             async def source_candidates(source) -> list[tuple[str, datetime | None, str]]:
-                async with semaphore:
-                    candidates = await self._sitemap_candidates(client, source.url, date_from, date_to)
-                    if candidates:
-                        return [(url, published, "sitemap") for url, published in candidates]
-                    return await self._wordpress_candidates(client, source.url, query, date_from, date_to)
+                try:
+                    async with semaphore:
+                        candidates = await self._sitemap_candidates(client, source.url, date_from, date_to)
+                        if candidates:
+                            return [(url, published, "sitemap") for url, published in candidates]
+                        return await self._wordpress_candidates(client, source.url, query, date_from, date_to)
+                except Exception as exc:
+                    LOGGER.warning("Historical source failed: %s: %s", source.name, exc)
+                    return []
 
             batches = await asyncio.gather(*(source_candidates(source) for source in sources))
             seen: set[str] = set()
