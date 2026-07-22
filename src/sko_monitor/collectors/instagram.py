@@ -106,6 +106,8 @@ class InstagramCollector(Collector):
             save_metadata=False,
             compress_json=False,
             quiet=True,
+            max_connection_attempts=1,
+            request_timeout=min(12.0, self.settings.request_timeout),
         )
         if self.settings.instagram_username and self.settings.instagram_session_file:
             session = Path(self.settings.instagram_session_file)
