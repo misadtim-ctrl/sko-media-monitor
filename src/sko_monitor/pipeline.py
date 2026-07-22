@@ -69,7 +69,7 @@ class MonitorPipeline:
         sources = self._select_sources(mode)
         report = RunReport(sources_total=len(sources))
         run_seen: set[str] = set()
-        pending_memory: list[tuple[tuple[str, ...], str, bool]] = []
+        pending_memory: list[tuple[tuple[str, ...], str, bool, bool]] = []
         timeout = httpx.Timeout(self.settings.request_timeout)
         limits = httpx.Limits(max_connections=self.settings.concurrency * 2, max_keepalive_connections=10)
         headers = {"User-Agent": self.settings.user_agent, "Accept-Language": "ru,kk;q=0.9,en;q=0.5"}
@@ -163,22 +163,35 @@ class MonitorPipeline:
                         report.relevant += 1
                     if analysis.needs_review:
                         report.needs_review += 1
-                    direct_delivery = self.settings.enable_delivery and telegram.configured_for(
-                        publication.workflow
+                    allow_python_main = self.settings.enable_python_main_delivery or (
+                        publication.workflow != "sko_mentions"
+                    )
+                    direct_delivery = (
+                        self.settings.enable_delivery
+                        and allow_python_main
+                        and telegram.configured_for(publication.workflow)
                     )
                     if direct_delivery and self.state.enqueue(
                         payload_id(publication), publication.workflow, payload
                     ):
                         report.queued += 1
-                    pending_memory.append((keys, publication.source_id, direct_delivery))
+                    pending_memory.append(
+                        (keys, publication.source_id, direct_delivery, allow_python_main)
+                    )
 
             bridge_accepted = False
-            if report.results and self.settings.enable_delivery:
-                bridge_accepted = await sheets.publish(report.results)
+            bridge_items = [
+                item
+                for item in report.results
+                if item["publication"]["workflow"] != "sko_mentions"
+                or self.settings.enable_python_main_delivery
+            ]
+            if bridge_items and self.settings.enable_delivery:
+                bridge_accepted = await sheets.publish(bridge_items)
             if report.results:
                 export_latest(report.results, self.settings.export_dir)
-            for keys, source_id, direct_delivery in pending_memory:
-                if bridge_accepted or direct_delivery:
+            for keys, source_id, direct_delivery, bridge_delivery in pending_memory:
+                if direct_delivery or (bridge_delivery and bridge_accepted):
                     self.state.remember(keys, source_id, ttl_days=365)
             if self.settings.enable_delivery:
                 report.sent = await self._flush_outbox(telegram)

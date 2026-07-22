@@ -39,9 +39,13 @@ class Publication:
         return "\n".join(part.strip() for part in parts if part and part.strip())
 
     def geographic_text(self) -> str:
-        """Text allowed to prove geography for automatic channel delivery."""
-        parts = [self.title, self.text[:4000]]
-        parts.extend(str(self.metadata.get(key, ""))[:4000] for key in ("ocr_text", "transcript"))
+        """Headline and lead allowed to prove that a story is about the place."""
+        # A region mentioned in an endnote or a national statistics table is
+        # not the subject of the story. Channel delivery is intentionally
+        # stricter than historical search: geography must be in the headline
+        # or lead, where an editor establishes what the news is about.
+        parts = [self.title, self.text[:750]]
+        parts.extend(str(self.metadata.get(key, ""))[:750] for key in ("ocr_text", "transcript"))
         return "\n".join(part.strip() for part in parts if part and part.strip())
 
     def to_dict(self) -> dict[str, Any]:

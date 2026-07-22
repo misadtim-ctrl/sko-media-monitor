@@ -12,9 +12,12 @@ from sko_monitor.pipeline import MonitorPipeline
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("bridge_accepted", [False, True])
+@pytest.mark.parametrize(
+    ("bridge_accepted", "allow_python_main", "expected_seen"),
+    [(False, True, False), (True, True, True), (True, False, False)],
+)
 async def test_relevant_link_is_remembered_only_after_durable_delivery(
-    tmp_path, monkeypatch, bridge_accepted
+    tmp_path, monkeypatch, bridge_accepted, allow_python_main, expected_seen
 ) -> None:
     registry = tmp_path / "sources.json"
     registry.write_text(
@@ -40,6 +43,10 @@ async def test_relevant_link_is_remembered_only_after_durable_delivery(
     monkeypatch.setenv("EXPORT_DIR", str(tmp_path / "exports"))
     monkeypatch.setenv("APPS_SCRIPT_WEBHOOK_URL", "https://script.google.test/bridge")
     monkeypatch.setenv("MONITOR_WEBHOOK_SECRET", "test-secret")
+    if allow_python_main:
+        monkeypatch.setenv("ENABLE_PYTHON_MAIN_DELIVERY", "true")
+    else:
+        monkeypatch.delenv("ENABLE_PYTHON_MAIN_DELIVERY", raising=False)
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
     monkeypatch.delenv("TELEGRAM_MAIN_CHAT_ID", raising=False)
 
@@ -71,4 +78,4 @@ async def test_relevant_link_is_remembered_only_after_durable_delivery(
     report = await pipeline.run("main", lookback_hours=72)
 
     assert report.relevant == 1
-    assert pipeline.state.is_seen(dedupe_keys(publication)) is bridge_accepted
+    assert pipeline.state.is_seen(dedupe_keys(publication)) is expected_seen

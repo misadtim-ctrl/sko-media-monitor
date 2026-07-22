@@ -46,9 +46,10 @@ jobs:
           APPS_SCRIPT_WEBHOOK_URL: ${{ secrets.APPS_SCRIPT_WEBHOOK_URL }}
           MONITOR_WEBHOOK_SECRET: ${{ secrets.MONITOR_WEBHOOK_SECRET }}
           ENABLE_SEMANTIC: "true"
-          ENABLE_DELIVERY: "true"
+          ENABLE_DELIVERY: "false"
+          ENABLE_PYTHON_MAIN_DELIVERY: "false"
           SOURCE_REGISTRY: config/sources.json
-          STATE_DB: data/state.sqlite3
+          STATE_DB: data/shadow-main.sqlite3
           EXPORT_DIR: exports
         run: sko-monitor run --mode main --lookback-hours 72
 

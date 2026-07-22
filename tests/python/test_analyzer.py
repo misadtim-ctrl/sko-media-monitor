@@ -86,6 +86,30 @@ def test_regional_institution_is_relevant() -> None:
     assert result.relevant
 
 
+def test_late_sko_reference_does_not_make_another_region_story_relevant() -> None:
+    text = (
+        "Правительство выделило средства на дамбу озера Алаколь. "
+        + "Подробности проекта и туристического развития озера. " * 20
+        + "За два года дамбы строили также в Северо-Казахстанской области."
+    )
+    publication = Publication(
+        source_id="test",
+        source_name="Test",
+        platform="website",
+        workflow="sko_mentions",
+        url="https://example.test/alakol",
+        title="Правительство выделило средства на дамбу озера Алаколь",
+        text=text,
+    )
+    result = analyzer.analyze(publication)
+    assert not result.relevant
+
+
+def test_northern_kazakhstan_without_sko_marker_is_not_precise_enough() -> None:
+    result = analyzer.analyze(item("sko_mentions", "Центр Северного Казахстана - Кокшетау"))
+    assert not result.relevant
+
+
 def test_akimat_road_complaint_is_negative() -> None:
     result = analyzer.analyze(
         item("akimat_negative", "Жители жалуются на разбитую дорогу и просят акимат принять меры")
