@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -24,6 +25,29 @@ def _macos_message(message: str) -> None:
     subprocess.run(
         ["osascript", "-e", f'display alert "{message}" as warning'],
         check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _checkpoint_url(error: Exception) -> str:
+    match = re.search(r"Point your browser to (/auth_platform/\?\S+) - follow", str(error))
+    if not match:
+        return ""
+    return f"https://www.instagram.com{match.group(1)}"
+
+
+def _macos_confirm_checkpoint(url: str) -> None:
+    subprocess.run(["open", url], check=True, capture_output=True, text=True)
+    subprocess.run(
+        [
+            "osascript",
+            "-e",
+            'display dialog "Instagram открыл страницу защиты. Разрешите вход в браузере, '
+            'затем вернитесь сюда." buttons {"Отмена", "Я подтвердил вход"} '
+            'default button "Я подтвердил вход" cancel button "Отмена"',
+        ],
+        check=True,
         capture_output=True,
         text=True,
     )
@@ -58,5 +82,10 @@ def create_session(username: str, destination: Path, *, macos_dialog: bool = Fal
                     except instaloader.exceptions.BadCredentialsException:
                         _macos_message("Код не подошёл. Введите новый код подтверждения.")
                 break
+            except instaloader.exceptions.LoginException as exc:
+                checkpoint_url = _checkpoint_url(exc)
+                if not checkpoint_url:
+                    raise
+                _macos_confirm_checkpoint(checkpoint_url)
     loader.save_session_to_file(str(destination))
     return destination
