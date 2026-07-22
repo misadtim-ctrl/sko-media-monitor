@@ -2,9 +2,12 @@ import httpx
 import pytest
 import respx
 
+from sko_monitor.collectors.base import CollectorError
+from sko_monitor.collectors.instagram import InstagramCollector
 from sko_monitor.collectors.parsing import compact_title
 from sko_monitor.collectors.telegram import TelegramCollector
 from sko_monitor.collectors.website import WebsiteCollector
+from sko_monitor.config import Settings
 from sko_monitor.models import Publication, Source
 
 
@@ -90,3 +93,26 @@ def test_article_hydration_prefers_structured_article_body() -> None:
 def test_compact_title_never_cuts_a_word_into_fake_sko() -> None:
     title = compact_title("А" * 160 + " мопедист ехал на полной скорости и скрылся", limit=190)
     assert " ско…" not in title.lower()
+
+
+@pytest.mark.asyncio
+async def test_instagram_does_not_probe_profiles_without_authorised_session(monkeypatch) -> None:
+    for name in (
+        "INSTAGRAM_USERNAME",
+        "INSTAGRAM_SESSION_FILE",
+        "META_ACCESS_TOKEN",
+        "META_IG_USER_ID",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    source = Source(
+        "instagram-public",
+        "Public account",
+        "instagram",
+        "https://www.instagram.com/public_account/",
+        "civic_watch",
+        "akimat_negative",
+    )
+    async with httpx.AsyncClient() as client:
+        collector = InstagramCollector(client, Settings.from_env())
+        with pytest.raises(CollectorError, match="authorised session"):
+            await collector.collect(source)

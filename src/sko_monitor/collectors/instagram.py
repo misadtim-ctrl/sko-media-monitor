@@ -32,6 +32,16 @@ class InstagramCollector(Collector):
                 # A profile may be personal rather than Business/Creator.
                 # Instaloader remains a bounded fallback for public profiles.
                 pass
+        session_file = Path(self.settings.instagram_session_file)
+        has_session = bool(
+            self.settings.instagram_username
+            and self.settings.instagram_session_file
+            and session_file.is_file()
+        )
+        if not has_session:
+            raise CollectorError(
+                "Instagram needs the one-time authorised session; profile was not probed"
+            )
         async with self._rate_lock:
             try:
                 return await asyncio.to_thread(self._collect_instaloader, source, username)

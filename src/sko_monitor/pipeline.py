@@ -4,7 +4,7 @@ import asyncio
 import json
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 
 import httpx
@@ -223,7 +223,16 @@ class MonitorPipeline:
         if mode == "main":
             return [source for source in sources if source.workflow == "sko_mentions"]
         if mode == "negative":
-            return [source for source in sources if source.workflow == "akimat_negative"]
+            civic_sources = [source for source in sources if source.workflow == "akimat_negative"]
+            # Local media sites are a useful second, free signal for the daily
+            # complaints channel.  They are analysed by the strict negative
+            # classifier, never published as ordinary regional news.
+            local_media = [
+                replace(source, workflow="akimat_negative")
+                for source in sources
+                if source.workflow == "regional_news" and source.platform == "website"
+            ]
+            return [*civic_sources, *local_media]
         if mode == "regional":
             return [source for source in sources if source.workflow == "regional_news"]
         if mode == "all":

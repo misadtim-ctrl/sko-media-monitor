@@ -79,3 +79,51 @@ async def test_relevant_link_is_remembered_only_after_durable_delivery(
 
     assert report.relevant == 1
     assert pipeline.state.is_seen(dedupe_keys(publication)) is expected_seen
+
+
+def test_negative_mode_uses_local_media_sites_as_strict_fallback(tmp_path, monkeypatch) -> None:
+    registry = tmp_path / "sources.json"
+    registry.write_text(
+        json.dumps(
+            {
+                "sources": [
+                    {
+                        "id": "civic",
+                        "name": "Civic",
+                        "platform": "instagram",
+                        "url": "https://www.instagram.com/civic/",
+                        "scope": "civic_watch",
+                        "workflow": "akimat_negative",
+                        "enabled": True,
+                    },
+                    {
+                        "id": "local-site",
+                        "name": "Local site",
+                        "platform": "website",
+                        "url": "https://local.example/",
+                        "scope": "local_media",
+                        "workflow": "regional_news",
+                        "enabled": True,
+                    },
+                    {
+                        "id": "local-instagram",
+                        "name": "Local Instagram",
+                        "platform": "instagram",
+                        "url": "https://www.instagram.com/local/",
+                        "scope": "local_media",
+                        "workflow": "regional_news",
+                        "enabled": True,
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SOURCE_REGISTRY", str(registry))
+
+    sources = MonitorPipeline(Settings.from_env())._select_sources("negative")
+
+    assert [(source.id, source.workflow) for source in sources] == [
+        ("civic", "akimat_negative"),
+        ("local-site", "akimat_negative"),
+    ]
