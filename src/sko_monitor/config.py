@@ -76,10 +76,10 @@ class Settings:
             instagram_username=os.getenv("INSTAGRAM_USERNAME", "").strip(),
             instagram_session_file=os.getenv("INSTAGRAM_SESSION_FILE", "").strip(),
             instagram_min_delay_seconds=max(
-                1.0, float(os.getenv("INSTAGRAM_MIN_DELAY_SECONDS", "20"))
+                1.0, float(os.getenv("INSTAGRAM_MIN_DELAY_SECONDS", "25"))
             ),
             instagram_profiles_per_run=max(
-                1, int(os.getenv("INSTAGRAM_PROFILES_PER_RUN", "4"))
+                1, int(os.getenv("INSTAGRAM_PROFILES_PER_RUN", "32"))
             ),
             instagram_posts_per_profile=max(1, int(os.getenv("INSTAGRAM_POSTS_PER_PROFILE", "8"))),
             meta_access_token=os.getenv("META_ACCESS_TOKEN", "").strip(),
