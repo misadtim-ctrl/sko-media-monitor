@@ -78,6 +78,29 @@ const skoBaiterek = sandbox.checkTextForSko_(
 );
 assert.equal(skoBaiterek.status, 'hit', 'Baiterek with clear SKO context must remain publishable');
 
+assert.equal(
+  sandbox.cleanListingTitle_('Страна Сегодня, 09:19 В СКО бесплатно подключили дома к теплу'),
+  'В СКО бесплатно подключили дома к теплу',
+);
+assert.equal(
+  sandbox.cleanListingTitle_('20:28, 24 Июля 2026 Объем финансирования предприятий увеличили'),
+  'Объем финансирования предприятий увеличили',
+);
+assert.equal(
+  sandbox.cleanListingTitle_('24 часа без воды: жители Петропавловска обратились к властям'),
+  '24 часа без воды: жители Петропавловска обратились к властям',
+  'A real title that begins with a number must remain intact',
+);
+
+const htmlItems = sandbox.extractFromHtml_(
+  '<article><time datetime="2026-07-26T09:15:00+05:00"></time>' +
+    '<a href="/news/sko/road">09:15, 26 июля 2026 В СКО отремонтировали дорогу</a></article>',
+  'https://example.kz/',
+);
+assert.equal(htmlItems.length, 1);
+assert.equal(htmlItems[0].title, 'В СКО отремонтировали дорогу');
+assert.equal(htmlItems[0].pubDate.toISOString(), '2026-07-26T04:15:00.000Z');
+
 assert.match(code, /SEEN_MAX:\s+50000/, 'Seen memory must cover more than one full crawl');
 assert.match(code, /enqueueTelegramFindings_\(findings, headerLabel\);\s*flushTelegramQueue_\(\);/s);
 assert.doesNotMatch(code, /tgSeen\[gk\]/, 'Channel dedupe must not suppress another publisher globally');
@@ -91,5 +114,8 @@ assert.match(
 );
 assert.match(code, /upd\.action === 'delivery_status'/);
 assert.match(code, /upd\.action === 'run_main_check'/);
+assert.match(code, /getRange\(2, 1, sh\.getLastRow\(\) - 1, 6\)\.clearContent\(\)/);
+assert.doesNotMatch(code, /function globalTitleKey_\(/);
+assert.doesNotMatch(code, /function normalizeTitleForKey_\(/);
 
 console.log('Apps Script core tests: OK');

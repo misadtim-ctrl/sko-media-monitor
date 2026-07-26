@@ -78,6 +78,8 @@ async def test_relevant_link_is_remembered_only_after_durable_delivery(
     report = await pipeline.run("main", lookback_hours=72)
 
     assert report.relevant == 1
+    assert report.bridge_attempted is allow_python_main
+    assert report.bridge_delivered is (bridge_accepted and allow_python_main)
     assert pipeline.state.is_seen(dedupe_keys(publication)) is expected_seen
 
 

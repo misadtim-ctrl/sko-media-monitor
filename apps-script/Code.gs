@@ -609,7 +609,7 @@ function clearSkoFindings() {
   var ss = SpreadsheetApp.getActive();
   [CFG.FINDINGS, CFG.MAYBE].forEach(function(name) {
     var sh = ss.getSheetByName(name);
-    if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 5).clearContent();
+    if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 6).clearContent();
   });
   SpreadsheetApp.getUi().alert('Находки очищены. Память ссылок сохранена.');
 }
@@ -840,7 +840,8 @@ function extractFromRss_(xml, sourceUrl) {
   var items = [];
   var blocks = xml.match(/<(item|entry)\b[\s\S]*?<\/\1>/gi) || [];
   blocks.forEach(function(b) {
-    var title = tagVal_(b, 'title');
+    var rawTitle = clean_(tagVal_(b, 'title'));
+    var title = cleanListingTitle_(rawTitle);
     var link  = tagVal_(b, 'link') || attrVal_(b, 'link', 'href');
     var descRaw = tagVal_(b, 'description') || tagVal_(b, 'summary');
     if (!title || !link) return;
@@ -858,8 +859,7 @@ function extractFromRss_(xml, sourceUrl) {
 
     // Дата публикации
     var pubRaw = tagVal_(b, 'pubDate') || tagVal_(b, 'published') || tagVal_(b, 'updated');
-    var pubDate = pubRaw ? new Date(pubRaw) : null;
-    if (pubDate && isNaN(pubDate.getTime())) pubDate = null;
+    var pubDate = parsePublicationDate_(pubRaw) || dateFromText_(rawTitle);
 
     items.push({
       title: clean_(title),
@@ -908,6 +908,63 @@ function dateFromText_(text) {
   return null;
 }
 
+function parsePublicationDate_(value) {
+  var raw = clean_(strip_(value || ''));
+  if (!raw) return null;
+  var parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) {
+    var year = parsed.getFullYear();
+    if (year >= 2020 && year <= 2035) return parsed;
+  }
+  return dateFromText_(raw);
+}
+
+function cleanListingTitle_(value) {
+  var title = clean_(value);
+  if (!title) return '';
+
+  // Удаляем только известные служебные рубрики перед временем. Произвольный
+  // текст до запятой не трогаем, чтобы не обрезать настоящий заголовок.
+  title = title.replace(
+    /^(?:страна\s+сегодня|сегодня|лента\s+новостей|новости|главное|общество|политика|экономика|регионы|казахстан)\s*[,|:–—-]\s*(?=\d{1,2}:\d{2})/i,
+    ''
+  );
+  title = title.replace(/^\d{1,2}:\d{2}\s*[,|•:–—-]?\s*/i, '');
+  title = title.replace(/^\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}\s*[,|•:–—-]?\s*/i, '');
+  title = title.replace(
+    new RegExp('^\\d{1,2}\\s+(' + MONTH_GEN_RE + ')(?:\\s+20\\d{2})?\\s*[,|•:–—-]?\\s*', 'i'),
+    ''
+  );
+  return clean_(title);
+}
+
+function dateFromHtmlContext_(html, anchorStart, anchorEnd) {
+  var source = String(html || '');
+  var start = Math.max(0, Number(anchorStart || 0));
+  var end = Math.max(start, Number(anchorEnd || start));
+  var blockStart = source.lastIndexOf('<article', start);
+  var blockEnd = blockStart >= 0 ? source.indexOf('</article>', end) : -1;
+  var hasArticle = blockStart >= 0 && start - blockStart <= 4000 &&
+    blockEnd >= end && blockEnd - blockStart <= 12000;
+  var context = hasArticle
+    ? source.slice(blockStart, blockEnd + 10)
+    : source.slice(Math.max(0, start - 350), Math.min(source.length, end + 350));
+
+  var patterns = [
+    /<time\b[^>]*\bdatetime=["']([^"']+)["']/i,
+    /\bitemprop=["']datePublished["'][^>]*\b(?:content|datetime)=["']([^"']+)["']/i,
+    /\b(?:content|datetime)=["']([^"']+)["'][^>]*\bitemprop=["']datePublished["']/i,
+    /\bproperty=["']article:published_time["'][^>]*\bcontent=["']([^"']+)["']/i,
+    /\bcontent=["']([^"']+)["'][^>]*\bproperty=["']article:published_time["']/i
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var match = context.match(patterns[i]);
+    var parsed = match ? parsePublicationDate_(match[1]) : null;
+    if (parsed) return parsed;
+  }
+  return hasArticle ? dateFromText_(clean_(strip_(context))) : null;
+}
+
 // Если оригинал не вытащился из description — достаём его со страницы
 // google news (там всегда есть прямая ссылка). Не больше 8 резолвов
 // за прогон, чтобы не жечь время.
@@ -946,7 +1003,8 @@ function extractFromHtml_(html, sourceUrl) {
 
   while ((m = re.exec(body)) !== null && items.length < CFG.MAX_PER_SITE * 3) {
     var url = absUrl_(decodeEnt_(m[1]), sourceUrl);
-    var title = clean_(strip_(m[2]));
+    var rawTitle = clean_(strip_(m[2]));
+    var title = cleanListingTitle_(rawTitle);
     if (!url || !title || title.length < 12) continue;
     if (!sameHost_(url, sourceUrl)) continue;
     if (/\.(jpg|jpeg|png|gif|webp|svg|pdf|zip|rar|mp3|mp4|css|js)(\?|$)/i.test(url)) continue;
@@ -960,7 +1018,9 @@ function extractFromHtml_(html, sourceUrl) {
     if (seen[key]) continue;
     seen[key] = true;
 
-    items.push({ title: title, url: url, extra: '' });
+    var pubDate = dateFromHtmlContext_(body, m.index, re.lastIndex) ||
+      dateFromText_(rawTitle) || dateFromUrl_(url);
+    items.push({ title: title, url: url, extra: '', pubDate: pubDate });
     if (items.length >= CFG.MAX_PER_SITE) break;
   }
   return items;
@@ -1475,27 +1535,6 @@ function urlKey_(url) {
   });
   kept.sort();
   return (base + (kept.length ? '?' + kept.join('&') : '')).toLowerCase();
-}
-
-// Нормализация заголовка для сравнения:
-// - отрезаем хвост " - Источник", который добавляет Google News
-//   (иначе "В СКО завод" и "В СКО завод - Казинформ" = разные ключи);
-// - убираем даты и время, вшитые в заголовок некоторыми сайтами;
-// - оставляем первые 10 слов.
-function normalizeTitleForKey_(title) {
-  var t = String(title || '').toLowerCase();
-  t = t.replace(/\s*[-–—]\s*[^-–—]{2,45}\s*$/, ' ');          // хвост источника
-  t = t.replace(/\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}/g, ' ');      // 20.07.2026
-  t = t.replace(/\d{1,2}:\d{2}/g, ' ');                        // 11:17
-  t = t.replace(/\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(\s+20\d{2})?/g, ' ');
-  t = t.replace(/[^0-9a-zа-яёәғқңөұүһі\s]/gi, ' ').replace(/\s+/g, ' ').trim();
-  return t.split(' ').slice(0, 10).join(' ');
-}
-
-// ГЛОБАЛЬНЫЙ ключ заголовка — БЕЗ домена. Ловит одну и ту же новость,
-// пришедшую разными путями (Google News / прямой обход / другой адрес).
-function globalTitleKey_(title) {
-  return 'gt|' + normalizeTitleForKey_(title);
 }
 
 // Заголовок считается дублем только внутри одного СМИ. Если Google News
@@ -2172,6 +2211,7 @@ function runPositiveCheck() {
 }
 
 function runPositiveCheckCore_() {
+  var started = Date.now();
   var ss = SpreadsheetApp.getActive();
   var srcSheet = ss.getSheetByName(CFG_REGIONAL_SHEET);
   if (!srcSheet || srcSheet.getLastRow() < 2) {
@@ -2193,8 +2233,14 @@ function runPositiveCheckCore_() {
   var positives = [];
   var checkedNew = 0, filtered = 0;
   var report = [];
+  var stoppedByTime = false;
 
   for (var i = 0; i < sources.length; i++) {
+    if (Date.now() - started > CFG.MAX_RUNTIME - CFG.SAFETY_STOP) {
+      stoppedByTime = true;
+      skoLog_('Позитив: стоп по времени', 'Источников обработано: ' + i + ' из ' + sources.length);
+      break;
+    }
     var src = sources[i];
     var res = fetchWithFallback_(src.url);
     if (!res.ok) { report.push(src.name + ':✗'); skoLog_('Позитив: сайт не отдал', src.name); continue; }
@@ -2242,6 +2288,7 @@ function runPositiveCheckCore_() {
       '✅ Позитивных: ' + positives.length + '\n' +
       '🚫 Отсеяно как негатив/нейтрал: ' + filtered + '\n\n' +
       'По сайтам: ' + report.join(' | ') + '\n\n' +
+      (stoppedByTime ? '⏳ Остальные источники проверятся при следующем запуске.\n\n' : '') +
       'Смотри лист ПОЗИТИВ (новые сверху).',
     found: positives.length
   };
@@ -2626,6 +2673,7 @@ function runPublicsCheck() {
 }
 
 function runPublicsCheckCore_() {
+  var started = Date.now();
   var ss = SpreadsheetApp.getActive();
   var sh = ss.getSheetByName(CFG_PUBLICS_SHEET);
   if (!sh || sh.getLastRow() < 2) {
@@ -2646,8 +2694,14 @@ function runPublicsCheckCore_() {
 
   var found = [];
   var report = [];
+  var stoppedByTime = false;
 
   for (var i = 0; i < channels.length; i++) {
+    if (Date.now() - started > CFG.MAX_RUNTIME - CFG.SAFETY_STOP) {
+      stoppedByTime = true;
+      skoLog_('Паблики: стоп по времени', 'Каналов обработано: ' + i + ' из ' + channels.length);
+      break;
+    }
     var ch = channels[i];
     var url = 'https://t.me/s/' + ch.channel;
     var resp;
@@ -2698,6 +2752,7 @@ function runPublicsCheckCore_() {
     message: '📲 Проверка пабликов завершена\n\n' +
       'Новых постов: ' + found.length + '\n' +
       'По каналам: ' + report.join(' | ') + '\n\n' +
+      (stoppedByTime ? '⏳ Остальные каналы проверятся при следующем запуске.\n' : '') +
       '✗ = канал не открылся: либо имя неверное, либо канал приватный.\n' +
       'Найденные посты — на листе НАХОДКИ.',
     found: found.length
@@ -3079,7 +3134,7 @@ function formatTelegramFinding_(f) {
   var sentTxt = Utilities.formatDate(new Date(), tz, 'dd.MM HH:mm');
   return '<b>' + tgEsc_(f.title) + '</b>\n\n' +
     '📰 ' + tgEsc_(f.src) +
-    (pubTxt ? '\n🗓 Опубликовано: ' + pubTxt : '') +
+    (pubTxt ? '\n🗓 Опубликовано: ' + pubTxt : '\n🗓 Опубликовано: дата не указана') +
     (ageTxt ? '  •  ' + ageTxt : '') +
     (f.note ? '\n🔎 Найдено: ' + tgEsc_(f.note) : '') +
     '\n\n<a href="' + tgEsc_(f.url) + '">➜ Читать материал</a>\n\n' +
@@ -3436,6 +3491,9 @@ function handleExternalHeartbeat_(payload) {
   props.setProperty('PY_LAST_HEARTBEAT', String(Date.now()));
   props.setProperty('PY_MONITOR_ACTIVE', '1');
   props.setProperty('PY_LAST_REPORT', JSON.stringify(payload.report || {}).slice(0, 4000));
+  if (payload.report && payload.report.bridge_delivered === true) {
+    props.deleteProperty('PY_LAST_BRIDGE_ALERT');
+  }
   return { ok: true, received_at: new Date().toISOString() };
 }
 
@@ -3510,7 +3568,23 @@ function checkPythonHeartbeatSilent_() {
   var props = PropertiesService.getScriptProperties();
   if (props.getProperty('PY_MONITOR_ACTIVE') !== '1') return;
   var last = Number(props.getProperty('PY_LAST_HEARTBEAT') || 0);
-  if (last && Date.now() - last <= 3 * 60 * 60 * 1000) return;
+  if (last && Date.now() - last <= 3 * 60 * 60 * 1000) {
+    var report = {};
+    try { report = JSON.parse(props.getProperty('PY_LAST_REPORT') || '{}'); } catch (eReport) {}
+    if (report.bridge_attempted === true && report.bridge_delivered !== true) {
+      var bridgeAlerted = Number(props.getProperty('PY_LAST_BRIDGE_ALERT') || 0);
+      if (!bridgeAlerted || Date.now() - bridgeAlerted >= 6 * 60 * 60 * 1000) {
+        props.setProperty('PY_LAST_BRIDGE_ALERT', String(Date.now()));
+        var bridgeError = String(report.bridge_error || 'Apps Script не принял материалы').slice(0, 500);
+        notifyAdmin_(
+          '<b>Python работает, но не передал материалы в таблицу</b>\n\n' +
+          tgEsc_(bridgeError) + '\n\nПроверь последнее выполнение GitHub Actions.'
+        );
+        skoLog_('Python мост ошибка', bridgeError);
+      }
+    }
+    return;
+  }
   var alerted = Number(props.getProperty('PY_LAST_ALERT') || 0);
   if (alerted && Date.now() - alerted < 12 * 60 * 60 * 1000) return;
   props.setProperty('PY_LAST_ALERT', String(Date.now()));
@@ -3636,6 +3710,9 @@ function telegramDeliveryStatus_(payload) {
     relevant: Number(lastReport.relevant || 0),
     queued: Number(lastReport.queued || 0),
     sent: Number(lastReport.sent || 0),
+    bridge_attempted: lastReport.bridge_attempted === true,
+    bridge_delivered: lastReport.bridge_delivered === true,
+    bridge_error: diagnosticText_(lastReport.bridge_error, 300),
     errorCount: reportErrors.length,
     errors: reportErrors.slice(0, 5).map(function(e) { return diagnosticText_(e, 300); })
   };

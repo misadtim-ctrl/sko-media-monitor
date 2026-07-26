@@ -40,6 +40,9 @@ class RunReport:
     needs_review: int = 0
     queued: int = 0
     sent: int = 0
+    bridge_attempted: bool = False
+    bridge_delivered: bool = False
+    bridge_error: str = ""
     errors: list[str] = field(default_factory=list)
     results: list[dict] = field(default_factory=list)
 
@@ -54,6 +57,9 @@ class RunReport:
             "needs_review": self.needs_review,
             "queued": self.queued,
             "sent": self.sent,
+            "bridge_attempted": self.bridge_attempted,
+            "bridge_delivered": self.bridge_delivered,
+            "bridge_error": self.bridge_error,
             "errors": self.errors,
         }
 
@@ -188,7 +194,14 @@ class MonitorPipeline:
                 or self.settings.enable_python_main_delivery
             ]
             if bridge_items and self.settings.enable_delivery:
+                report.bridge_attempted = True
                 bridge_accepted = await sheets.publish(bridge_items)
+                report.bridge_delivered = bridge_accepted
+                if not bridge_accepted:
+                    report.bridge_error = (
+                        getattr(sheets, "last_error", "") or "Apps Script did not accept items"
+                    )
+                    report.errors.append(f"Apps Script bridge: {report.bridge_error}")
             if report.results:
                 export_latest(report.results, self.settings.export_dir)
             for keys, source_id, direct_delivery, bridge_delivery in pending_memory:
