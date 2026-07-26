@@ -27,7 +27,7 @@ jobs:
           node-version: "22"
 
       - name: Install test dependencies
-        run: pip install -e '.[dev]'
+        run: pip install -e '.[dev,instagram]'
 
       - name: Test Python and source registry
         run: |
