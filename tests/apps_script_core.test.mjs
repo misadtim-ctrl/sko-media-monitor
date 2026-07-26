@@ -60,11 +60,36 @@ const googleB = sandbox.sourceTitleKey_(
 );
 assert.notEqual(googleA, googleB, 'Unresolved Google News links must remain separated by publisher');
 
+const ambiguousBaiterek = sandbox.checkTextForSko_(
+  'В Астане у монумента Байтерек состоялось торжественное мероприятие',
+  ['Байтерек'],
+  [],
+);
+assert.equal(
+  ambiguousBaiterek.status,
+  'maybe',
+  'Baiterek alone must not auto-post an Astana story as SKO',
+);
+
+const skoBaiterek = sandbox.checkTextForSko_(
+  'В селе Байтерек Кызылжарского района СКО отремонтировали дорогу',
+  ['Байтерек', 'Кызылжарск', 'СКО'],
+  [],
+);
+assert.equal(skoBaiterek.status, 'hit', 'Baiterek with clear SKO context must remain publishable');
+
 assert.match(code, /SEEN_MAX:\s+50000/, 'Seen memory must cover more than one full crawl');
 assert.match(code, /enqueueTelegramFindings_\(findings, headerLabel\);\s*flushTelegramQueue_\(\);/s);
 assert.doesNotMatch(code, /tgSeen\[gk\]/, 'Channel dedupe must not suppress another publisher globally');
 assert.match(code, /function enableAutoCheckSilent_\(\)/);
 assert.doesNotMatch(code, /newTrigger\('makeWeeklyBackup_'\)/, 'Publication archive backups stay disabled');
 assert.match(code, /confirmedNegative\.map\(function\(x\) \{ return x\.finding; \}\)/);
+assert.match(
+  code,
+  /var staleCut = Date\.now\(\) - 24 \* 60 \* 60 \* 1000/,
+  'Every fresh main finding must remain eligible for Telegram for the full monitoring day',
+);
+assert.match(code, /upd\.action === 'delivery_status'/);
+assert.match(code, /upd\.action === 'run_main_check'/);
 
 console.log('Apps Script core tests: OK');

@@ -744,6 +744,29 @@ function checkTextForSko_(text, dict, stopWords) {
     return { status: 'no' };
   }
 
+  // «Байтерек» неоднозначен: это и село в СКО, и монумент/район в Астане.
+  // Одного этого слова недостаточно для автоматической публикации в канал.
+  // Если полный текст содержит другой ориентир СКО, обычное правило ниже
+  // подтвердит материал.
+  var onlyBaiterek = matched.every(function(word) {
+    return String(word || '').toLowerCase().trim() === 'байтерек';
+  });
+  var hasStrongSkoContext =
+    containsWord_(low, 'СКО') ||
+    containsWord_(low, 'Северо-Казахстанск') ||
+    containsWord_(low, 'Северный Казахстан') ||
+    containsWord_(low, 'Солтүстік Қазақстан') ||
+    containsWord_(low, 'Петропавловск') ||
+    containsWord_(low, 'Петропавл') ||
+    containsWord_(low, 'Кызылжарск');
+  if (onlyBaiterek && !hasStrongSkoContext) {
+    return {
+      status: 'maybe',
+      matched: matched,
+      reason: 'Неоднозначное название «Байтерек»: нет подтверждения связи с СКО'
+    };
+  }
+
   // 4. Есть совпадения, но есть и стоп-слово — на проверку, не выбрасываем
   if (stopHits.length > 0) {
     return {
@@ -2994,7 +3017,10 @@ function enqueueTelegramFindings_(findings, headerLabel) {
     });
   }
 
-  var staleCut = Date.now() - 6 * 60 * 60 * 1000;
+  // Основной мониторинг сам принимает только материалы за последние сутки.
+  // Telegram обязан получить всё, что уже прошло этот фильтр и попало в
+  // НАХОДКИ; тональность на доставку не влияет.
+  var staleCut = Date.now() - 24 * 60 * 60 * 1000;
   var skippedStale = 0;
   var rows = [];
   findings.slice().sort(function(a, b) {
@@ -3027,7 +3053,7 @@ function enqueueTelegramFindings_(findings, headerLabel) {
     sh.getRange(sh.getLastRow() + 1, 1, rows.length, TG_QUEUE_HEADERS.length).setValues(rows);
     skoLog_('Telegram очередь', 'Добавлено: ' + rows.length);
   }
-  if (skippedStale) skoLog_('Не в канал (старше 6 ч)', String(skippedStale));
+  if (skippedStale) skoLog_('Не в канал (старше 24 ч)', String(skippedStale));
   return rows.length;
 }
 
@@ -3495,6 +3521,156 @@ function checkPythonHeartbeatSilent_() {
   skoLog_('Python watchdog', 'Нет heartbeat более 3 часов');
 }
 
+function telegramDeliveryStatus_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+
+  var token = props.getProperty('TG_TOKEN') || '';
+  var mainChat = props.getProperty('TG_CHAT') || '';
+  var negativeChat = props.getProperty('TG_NEG_CHAT') || '';
+  var ss = SpreadsheetApp.getActive();
+  var queue = ss.getSheetByName(TG_QUEUE_SHEET);
+  var queueCounts = { pending: 0, retry: 0, sending: 0, sent: 0, skipped: 0, cancelled: 0 };
+  var recentErrors = [];
+  var recentQueue = [];
+  function diagnosticText_(value, limit) {
+    return String(value || '').replace(/[\uD800-\uDFFF]/g, '').slice(0, limit || 300);
+  }
+  if (queue && queue.getLastRow() >= 2) {
+    var queueRows = queue.getRange(2, 1, queue.getLastRow() - 1, TG_QUEUE_HEADERS.length).getValues();
+    queueRows.forEach(function(r) {
+      var state = String(r[3] || 'pending');
+      queueCounts[state] = Number(queueCounts[state] || 0) + 1;
+      if (r[14]) {
+        recentErrors.push({
+          status: state,
+          source: diagnosticText_(r[6], 120),
+          title: diagnosticText_(r[7], 180),
+          url: diagnosticText_(r[8], 500),
+          error: diagnosticText_(r[14], 300)
+        });
+      }
+    });
+    queueRows.slice(-12).forEach(function(r) {
+      recentQueue.push({
+        status: diagnosticText_(r[3] || 'pending', 30),
+        createdAt: r[1] instanceof Date ? r[1].toISOString() : diagnosticText_(r[1], 50),
+        source: diagnosticText_(r[6], 120),
+        title: diagnosticText_(r[7], 220),
+        url: diagnosticText_(r[8], 500),
+        flow: diagnosticText_(r[11], 80),
+        error: diagnosticText_(r[14], 300)
+      });
+    });
+  }
+
+  var triggerNames = ScriptApp.getProjectTriggers().map(function(t) {
+    return t.getHandlerFunction();
+  });
+  var telegram = {
+    configured: !!(token && mainChat),
+    apiOk: false,
+    chatTitle: '',
+    botStatus: '',
+    error: ''
+  };
+  if (token && mainChat) {
+    try {
+      var meResp = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/getMe', {
+        muteHttpExceptions: true
+      });
+      var me = JSON.parse(meResp.getContentText() || '{}');
+      if (meResp.getResponseCode() !== 200 || !me.ok || !me.result) {
+        throw new Error(me.description || ('getMe HTTP ' + meResp.getResponseCode()));
+      }
+      var chatResp = UrlFetchApp.fetch(
+        'https://api.telegram.org/bot' + token + '/getChat?chat_id=' + encodeURIComponent(mainChat),
+        { muteHttpExceptions: true }
+      );
+      var chatInfo = JSON.parse(chatResp.getContentText() || '{}');
+      if (chatResp.getResponseCode() !== 200 || !chatInfo.ok || !chatInfo.result) {
+        throw new Error(chatInfo.description || ('getChat HTTP ' + chatResp.getResponseCode()));
+      }
+      telegram.chatTitle = diagnosticText_(chatInfo.result.title || chatInfo.result.username, 160);
+      var memberResp = UrlFetchApp.fetch(
+        'https://api.telegram.org/bot' + token + '/getChatMember?chat_id=' +
+          encodeURIComponent(mainChat) + '&user_id=' + encodeURIComponent(me.result.id),
+        { muteHttpExceptions: true }
+      );
+      var member = JSON.parse(memberResp.getContentText() || '{}');
+      if (memberResp.getResponseCode() !== 200 || !member.ok || !member.result) {
+        throw new Error(member.description || ('getChatMember HTTP ' + memberResp.getResponseCode()));
+      }
+      telegram.apiOk = true;
+      telegram.botStatus = String(member.result.status || '');
+    } catch (e) {
+      telegram.error = String(e.message || e).slice(0, 300);
+    }
+  }
+
+  var lastReport = {};
+  try { lastReport = JSON.parse(props.getProperty('PY_LAST_REPORT') || '{}'); } catch (eReport) {}
+  var findings = ss.getSheetByName(CFG.FINDINGS);
+  var recentFindings = [];
+  if (findings && findings.getLastRow() >= 2) {
+    var findingCount = Math.min(10, findings.getLastRow() - 1);
+    findings.getRange(2, 1, findingCount, 6).getDisplayValues().forEach(function(r) {
+      recentFindings.push({
+        foundAt: diagnosticText_(r[0], 40),
+        publishedAt: diagnosticText_(r[1], 40),
+        source: diagnosticText_(r[2], 120),
+        title: diagnosticText_(r[3], 220),
+        url: diagnosticText_(r[4], 500)
+      });
+    });
+  }
+  var reportErrors = Array.isArray(lastReport.errors) ? lastReport.errors : [];
+  var reportSummary = {
+    sources_total: Number(lastReport.sources_total || 0),
+    sources_ok: Number(lastReport.sources_ok || 0),
+    sources_failed: Number(lastReport.sources_failed || 0),
+    collected: Number(lastReport.collected || 0),
+    relevant: Number(lastReport.relevant || 0),
+    queued: Number(lastReport.queued || 0),
+    sent: Number(lastReport.sent || 0),
+    errorCount: reportErrors.length,
+    errors: reportErrors.slice(0, 5).map(function(e) { return diagnosticText_(e, 300); })
+  };
+  return {
+    ok: true,
+    mainConfigured: !!(token && mainChat),
+    negativeConfigured: !!(token && negativeChat),
+    telegram: telegram,
+    triggers: triggerNames,
+    queue: queueCounts,
+    recentQueue: recentQueue,
+    recentErrors: recentErrors.slice(-10),
+    findingsRows: findings ? Math.max(0, findings.getLastRow() - 1) : 0,
+    recentFindings: recentFindings,
+    pythonLastHeartbeat: Number(props.getProperty('PY_LAST_HEARTBEAT') || 0),
+    pythonLastReport: reportSummary
+  };
+}
+
+function runMainCheckSecure_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(3000)) return { ok: false, error: 'busy' };
+  try {
+    var result = runSkoCheckCore_();
+    return { ok: true, run: result, delivery: telegramDeliveryStatus_(payload) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // Приём сообщений от Telegram (вебхук)
 function doPost(e) {
   try {
@@ -3507,6 +3683,8 @@ function doPost(e) {
     if (upd && upd.action === 'stop_external_main') return jsonOutput_(stopExternalMainDelivery_(upd));
     if (upd && upd.action === 'enable_legacy_auto') return jsonOutput_(enableLegacyAutoCheck_(upd));
     if (upd && upd.action === 'negative_status') return jsonOutput_(negativeChannelStatus_(upd));
+    if (upd && upd.action === 'delivery_status') return jsonOutput_(telegramDeliveryStatus_(upd));
+    if (upd && upd.action === 'run_main_check') return jsonOutput_(runMainCheckSecure_(upd));
 
     if (captureNegativeChannel_(upd)) return ContentService.createTextOutput('ok');
 
