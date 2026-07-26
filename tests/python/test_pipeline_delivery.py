@@ -81,7 +81,7 @@ async def test_relevant_link_is_remembered_only_after_durable_delivery(
     assert pipeline.state.is_seen(dedupe_keys(publication)) is expected_seen
 
 
-def test_negative_mode_uses_local_media_sites_as_strict_fallback(tmp_path, monkeypatch) -> None:
+def test_negative_mode_uses_only_civic_sources(tmp_path, monkeypatch) -> None:
     registry = tmp_path / "sources.json"
     registry.write_text(
         json.dumps(
@@ -123,7 +123,4 @@ def test_negative_mode_uses_local_media_sites_as_strict_fallback(tmp_path, monke
 
     sources = MonitorPipeline(Settings.from_env())._select_sources("negative")
 
-    assert [(source.id, source.workflow) for source in sources] == [
-        ("civic", "akimat_negative"),
-        ("local-site", "akimat_negative"),
-    ]
+    assert [(source.id, source.workflow) for source in sources] == [("civic", "akimat_negative")]

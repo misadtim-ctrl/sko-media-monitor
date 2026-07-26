@@ -145,6 +145,16 @@ def test_utility_modernisation_without_complaint_is_not_negative() -> None:
     assert not result.relevant
 
 
+def test_short_negative_marker_does_not_match_inside_word() -> None:
+    result = analyzer.analyze(
+        item(
+            "akimat_negative",
+            "На площадке SKO HUB встретились IT-компании и молодые специалисты",
+        )
+    )
+    assert not result.relevant
+
+
 def test_actual_fire_is_an_incident() -> None:
     result = analyzer.analyze(
         item(

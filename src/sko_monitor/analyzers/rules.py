@@ -8,6 +8,16 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower().replace("ё", "е")).strip()
 
 
+def has_marker(text: str, marker: str) -> bool:
+    if " " in marker:
+        return marker in text
+    return bool(re.search(r"(?<!\w)" + re.escape(marker) + r"\w*", text))
+
+
+def marker_hits(text: str, markers: tuple[str, ...]) -> list[str]:
+    return [marker for marker in markers if has_marker(text, marker)]
+
+
 SKO_STRONG = {
     "северо-казахстанск": "Северо-Казахстанская область",
     "солтүстік қазақстан": "Солтүстік Қазақстан",
@@ -484,7 +494,7 @@ def score_negative(text: str) -> RuleScore:
     category_scores: dict[str, int] = {}
     matched: list[str] = []
     for category, markers in NEGATIVE_CATEGORIES.items():
-        hits = [marker for marker in markers if marker in low]
+        hits = marker_hits(low, markers)
         if hits:
             category_scores[category] = len(hits)
             matched.extend(hits)
@@ -495,8 +505,8 @@ def score_negative(text: str) -> RuleScore:
     if not category_scores:
         return RuleScore(0.0, "прочее", [], [])
     category = max(category_scores, key=category_scores.get)
-    complaint_hits = [marker for marker in COMPLAINT_MARKERS if marker in low]
-    direct_issue_hits = [marker for marker in DIRECT_ISSUE_MARKERS if marker in low]
+    complaint_hits = marker_hits(low, COMPLAINT_MARKERS)
+    direct_issue_hits = marker_hits(low, DIRECT_ISSUE_MARKERS)
     matched.extend(complaint_hits)
     matched.extend(direct_issue_hits)
     if category != "происшествие" and not (complaint_hits or direct_issue_hits):
