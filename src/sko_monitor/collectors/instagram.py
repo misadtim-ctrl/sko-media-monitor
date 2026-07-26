@@ -19,6 +19,7 @@ class InstagramCollector(Collector):
         self.settings = settings
         self._rate_lock = asyncio.Lock()
         self._rate_limited = False
+        self._loader = None
 
     async def collect(self, source: Source) -> list[Publication]:
         username = urlsplit(source.url).path.strip("/").split("/", 1)[0]
@@ -96,33 +97,9 @@ class InstagramCollector(Collector):
         return result
 
     def _collect_instaloader(self, source: Source, username: str) -> list[Publication]:
+        loader = self._instaloader()
         try:
-            import instaloader
-        except ImportError as exc:
-            raise CollectorError(
-                "Instagram needs either the free Meta API credentials or the optional "
-                "'instagram' package with a reusable session"
-            ) from exc
-
-        loader = instaloader.Instaloader(
-            download_pictures=False,
-            download_videos=False,
-            download_video_thumbnails=False,
-            download_geotags=False,
-            download_comments=False,
-            save_metadata=False,
-            compress_json=False,
-            quiet=True,
-            max_connection_attempts=1,
-            request_timeout=min(12.0, self.settings.request_timeout),
-        )
-        if self.settings.instagram_username and self.settings.instagram_session_file:
-            session = Path(self.settings.instagram_session_file)
-            if session.exists():
-                loader.load_session_from_file(self.settings.instagram_username, str(session))
-
-        try:
-            profile = instaloader.Profile.from_username(loader.context, username)
+            profile = self._profile_from_username(loader, username)
             posts = profile.get_posts()
             result: list[Publication] = []
             seen_shortcodes: set[str] = set()
@@ -163,3 +140,39 @@ class InstagramCollector(Collector):
             return result
         except Exception as exc:
             raise CollectorError(f"Instagram @{username} unavailable: {exc}") from exc
+
+    def _instaloader(self):
+        if self._loader is not None:
+            return self._loader
+        try:
+            import instaloader
+        except ImportError as exc:
+            raise CollectorError(
+                "Instagram needs either the free Meta API credentials or the optional "
+                "'instagram' package with a reusable session"
+            ) from exc
+
+        loader = instaloader.Instaloader(
+            download_pictures=False,
+            download_videos=False,
+            download_video_thumbnails=False,
+            download_geotags=False,
+            download_comments=False,
+            save_metadata=False,
+            compress_json=False,
+            quiet=True,
+            max_connection_attempts=1,
+            request_timeout=min(12.0, self.settings.request_timeout),
+        )
+        if self.settings.instagram_username and self.settings.instagram_session_file:
+            session = Path(self.settings.instagram_session_file)
+            if session.exists():
+                loader.load_session_from_file(self.settings.instagram_username, str(session))
+        self._loader = loader
+        return loader
+
+    @staticmethod
+    def _profile_from_username(loader, username: str):
+        import instaloader
+
+        return instaloader.Profile.from_username(loader.context, username)

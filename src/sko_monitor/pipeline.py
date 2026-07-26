@@ -223,7 +223,25 @@ class MonitorPipeline:
         if mode == "main":
             return [source for source in sources if source.workflow == "sko_mentions"]
         if mode == "negative":
-            return [source for source in sources if source.workflow == "akimat_negative"]
+            civic_sources = [
+                source for source in sources if source.workflow == "akimat_negative"
+            ]
+            if self.settings.meta_access_token and self.settings.meta_ig_user_id:
+                return civic_sources
+            instagram_sources = [
+                source for source in civic_sources if source.platform == "instagram"
+            ]
+            selected_ids = set(
+                self.state.oldest_source_ids(
+                    [source.id for source in instagram_sources],
+                    self.settings.instagram_profiles_per_run,
+                )
+            )
+            return [
+                source
+                for source in civic_sources
+                if source.platform != "instagram" or source.id in selected_ids
+            ]
         if mode == "regional":
             return [source for source in sources if source.workflow == "regional_news"]
         if mode == "all":

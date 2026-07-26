@@ -7,7 +7,7 @@ from sko_monitor.collectors.website import WebsiteCollector
 from sko_monitor.config import Settings
 from sko_monitor.dedupe import dedupe_keys
 from sko_monitor.delivery.sheets import SheetsDelivery
-from sko_monitor.models import Publication
+from sko_monitor.models import Publication, SourceRun
 from sko_monitor.pipeline import MonitorPipeline
 
 
@@ -124,3 +124,52 @@ def test_negative_mode_uses_only_civic_sources(tmp_path, monkeypatch) -> None:
     sources = MonitorPipeline(Settings.from_env())._select_sources("negative")
 
     assert [(source.id, source.workflow) for source in sources] == [("civic", "akimat_negative")]
+
+
+def test_negative_mode_rotates_instagram_sources(tmp_path, monkeypatch) -> None:
+    registry = tmp_path / "sources.json"
+    registry.write_text(
+        json.dumps(
+            {
+                "sources": [
+                    {
+                        "id": f"instagram-{index}",
+                        "name": f"Instagram {index}",
+                        "platform": "instagram",
+                        "url": f"https://www.instagram.com/public_{index}/",
+                        "scope": "civic_watch",
+                        "workflow": "akimat_negative",
+                        "enabled": True,
+                    }
+                    for index in range(6)
+                ]
+                + [
+                    {
+                        "id": "threads",
+                        "name": "Threads",
+                        "platform": "threads",
+                        "url": "https://www.threads.com/@public/",
+                        "scope": "civic_watch",
+                        "workflow": "akimat_negative",
+                        "enabled": True,
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SOURCE_REGISTRY", str(registry))
+    monkeypatch.setenv("STATE_DB", str(tmp_path / "state.sqlite3"))
+    monkeypatch.setenv("INSTAGRAM_PROFILES_PER_RUN", "2")
+    monkeypatch.delenv("META_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("META_IG_USER_ID", raising=False)
+    pipeline = MonitorPipeline(Settings.from_env())
+
+    first = pipeline._select_sources("negative")
+    for source in first:
+        if source.platform == "instagram":
+            pipeline.state.record_source_run(SourceRun(source.id, True, 0, 1))
+    second = pipeline._select_sources("negative")
+
+    assert [source.id for source in first] == ["instagram-0", "instagram-1", "threads"]
+    assert [source.id for source in second] == ["instagram-2", "instagram-3", "threads"]

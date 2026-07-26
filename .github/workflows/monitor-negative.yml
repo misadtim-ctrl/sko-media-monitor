@@ -63,6 +63,7 @@ jobs:
           INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
           INSTAGRAM_SESSION_FILE: data/instagram-session
           INSTAGRAM_MIN_DELAY_SECONDS: "20"
+          INSTAGRAM_PROFILES_PER_RUN: "4"
           INSTAGRAM_POSTS_PER_PROFILE: "8"
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}

@@ -176,6 +176,32 @@ class StateStore:
                 ),
             )
 
+    def oldest_source_ids(self, source_ids: list[str], limit: int) -> list[str]:
+        if not source_ids or limit <= 0:
+            return []
+        placeholders = ",".join("?" for _ in source_ids)
+        with self.connect() as db:
+            checked = {
+                row["source_id"]: row["last_checked"]
+                for row in db.execute(
+                    f"""
+                    SELECT source_id, last_checked
+                    FROM source_state
+                    WHERE source_id IN ({placeholders})
+                    """,
+                    source_ids,
+                ).fetchall()
+            }
+        position = {source_id: index for index, source_id in enumerate(source_ids)}
+        return sorted(
+            source_ids,
+            key=lambda source_id: (
+                source_id in checked,
+                checked.get(source_id, ""),
+                position[source_id],
+            ),
+        )[:limit]
+
     def prune(self) -> dict[str, int]:
         now = datetime.now(UTC)
         sent_cutoff = now - timedelta(days=7)
