@@ -39,6 +39,8 @@ class Settings:
     enable_video_analysis: bool
     instagram_username: str
     instagram_session_file: str
+    instagram_min_delay_seconds: float
+    instagram_posts_per_profile: int
     meta_access_token: str
     meta_ig_user_id: str
     meta_graph_version: str
@@ -72,6 +74,10 @@ class Settings:
             enable_video_analysis=_bool_env("ENABLE_VIDEO_ANALYSIS", False),
             instagram_username=os.getenv("INSTAGRAM_USERNAME", "").strip(),
             instagram_session_file=os.getenv("INSTAGRAM_SESSION_FILE", "").strip(),
+            instagram_min_delay_seconds=max(
+                1.0, float(os.getenv("INSTAGRAM_MIN_DELAY_SECONDS", "20"))
+            ),
+            instagram_posts_per_profile=max(1, int(os.getenv("INSTAGRAM_POSTS_PER_PROFILE", "8"))),
             meta_access_token=os.getenv("META_ACCESS_TOKEN", "").strip(),
             meta_ig_user_id=os.getenv("META_IG_USER_ID", "").strip(),
             meta_graph_version=os.getenv("META_GRAPH_VERSION", "v22.0").strip(),

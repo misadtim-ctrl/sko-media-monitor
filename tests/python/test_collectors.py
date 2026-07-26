@@ -116,3 +116,38 @@ async def test_instagram_does_not_probe_profiles_without_authorised_session(monk
         collector = InstagramCollector(client, Settings.from_env())
         with pytest.raises(CollectorError, match="authorised session"):
             await collector.collect(source)
+
+
+@pytest.mark.asyncio
+async def test_instagram_pauses_remaining_profiles_after_rate_limit(monkeypatch, tmp_path) -> None:
+    session = tmp_path / "instagram-session"
+    session.write_text("session", encoding="utf-8")
+    monkeypatch.setenv("INSTAGRAM_USERNAME", "user")
+    monkeypatch.setenv("INSTAGRAM_SESSION_FILE", str(session))
+    monkeypatch.setenv("INSTAGRAM_MIN_DELAY_SECONDS", "1")
+    monkeypatch.delenv("META_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("META_IG_USER_ID", raising=False)
+    calls = 0
+
+    def rate_limited(_source: Source, _username: str) -> list[Publication]:
+        nonlocal calls
+        calls += 1
+        raise CollectorError("Instagram @public unavailable: 429 Too Many Requests")
+
+    source = Source(
+        "instagram-public",
+        "Public account",
+        "instagram",
+        "https://www.instagram.com/public_account/",
+        "civic_watch",
+        "akimat_negative",
+    )
+    async with httpx.AsyncClient() as client:
+        collector = InstagramCollector(client, Settings.from_env())
+        monkeypatch.setattr(collector, "_collect_instaloader", rate_limited)
+        with pytest.raises(CollectorError, match="429 Too Many Requests"):
+            await collector.collect(source)
+        with pytest.raises(CollectorError, match="paused"):
+            await collector.collect(source)
+
+    assert calls == 1

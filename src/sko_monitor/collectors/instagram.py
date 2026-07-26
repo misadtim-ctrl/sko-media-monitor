@@ -18,6 +18,7 @@ class InstagramCollector(Collector):
         super().__init__(client)
         self.settings = settings
         self._rate_lock = asyncio.Lock()
+        self._rate_limited = False
 
     async def collect(self, source: Source) -> list[Publication]:
         username = urlsplit(source.url).path.strip("/").split("/", 1)[0]
@@ -43,10 +44,16 @@ class InstagramCollector(Collector):
                 "Instagram needs the one-time authorised session; profile was not probed"
             )
         async with self._rate_lock:
+            if self._rate_limited:
+                raise CollectorError("Instagram paused for this run after 429 Too Many Requests")
             try:
                 return await asyncio.to_thread(self._collect_instaloader, source, username)
+            except CollectorError as exc:
+                if "429 Too Many Requests" in str(exc):
+                    self._rate_limited = True
+                raise
             finally:
-                await asyncio.sleep(1.5)
+                await asyncio.sleep(self.settings.instagram_min_delay_seconds)
 
     async def _collect_meta(self, source: Source, username: str) -> list[Publication]:
         version = self.settings.meta_graph_version.strip("/")
@@ -120,7 +127,7 @@ class InstagramCollector(Collector):
             result: list[Publication] = []
             seen_shortcodes: set[str] = set()
             for index, post in enumerate(posts):
-                if index >= 24:
+                if index >= self.settings.instagram_posts_per_profile:
                     break
                 if post.shortcode in seen_shortcodes:
                     continue
