@@ -119,3 +119,79 @@ assert.doesNotMatch(code, /function globalTitleKey_\(/);
 assert.doesNotMatch(code, /function normalizeTitleForKey_\(/);
 
 console.log('Apps Script core tests: OK');
+
+// Республиканские Telegram-каналы: без них 41 источник из 80 не проверял никто,
+// а у «Чиновника», «Писем Президенту» и Qazaqparat канал — единственная площадка.
+assert.match(code, /platform:\s*'telegram',\s*workflow:\s*'sko_mentions'/);
+assert.match(code, /hostOf_\(src\.url\) === 't\.me'/);
+assert.match(code, /function extractTelegramItems_\(/);
+assert.match(code, /function telegramChannelFromUrl_\(/);
+
+const tgHtml = [
+  '<div data-post="chinovnik_kz/7899" class="tgme_widget_message">',
+  '<time datetime="2026-07-25T13:37:11+00:00" class="time">13:37</time>',
+  '<div class="tgme_widget_message_text js-message_text">',
+  'Президент возложил цветы к мемориальной доске в Петропавловске</div></div>',
+  '<div data-post="chinovnik_kz/7900"><div class="tgme_widget_message_text">коротко</div></div>',
+].join('');
+const tgItems = sandbox.extractTelegramItems_(tgHtml);
+assert.equal(tgItems.length, 1, 'Короткие подписи под картинкой в канал не идут');
+assert.equal(tgItems[0].url, 'https://t.me/chinovnik_kz/7899');
+assert.equal(tgItems[0].pubDate.toISOString(), '2026-07-25T13:37:11.000Z');
+assert.equal(sandbox.telegramChannelFromUrl_('https://t.me/s/chinovnik_kz'), 'chinovnik_kz');
+assert.equal(sandbox.telegramChannelFromUrl_('https://t.me/QazAqparat_kz'), 'QazAqparat_kz');
+
+// Обход прерывается по лимиту времени, а начинался всегда с первого источника:
+// хвост списка терялся один и тот же и не проверялся никогда.
+assert.match(code, /var sources = rotateSources_\(loadSources_\(\)\)/);
+assert.match(code, /function rotateSources_\(/);
+
+let cursorValue = '0';
+sandbox.PropertiesService = {
+  getScriptProperties: () => ({
+    getProperty: (k) => (k === 'SKO_SOURCE_CURSOR' ? cursorValue : null),
+    setProperty: (k, v) => { if (k === 'SKO_SOURCE_CURSOR') cursorValue = v; },
+  }),
+};
+const list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+const firstRun = sandbox.rotateSources_(list.slice());
+const secondRun = sandbox.rotateSources_(list.slice());
+assert.deepEqual(firstRun, list, 'Первый прогон идёт в исходном порядке');
+assert.notDeepEqual(secondRun, firstRun, 'Второй прогон начинается с другого места');
+assert.equal(secondRun.length, list.length, 'Ни один источник не выпадает');
+assert.deepEqual([...secondRun].sort(), [...list].sort(), 'Состав списка сохраняется');
+assert.deepEqual(sandbox.rotateSources_(['solo']), ['solo']);
+
+// Пульт в Telegram: кнопки были написаны, но вебхук смотрел на постороннее
+// развёртывание, поэтому нажатия не доходили. Адрес теперь задаётся явно.
+assert.match(code, /upd\.action === 'bot_menu'/);
+assert.match(code, /function botMenuSecure_\(/);
+assert.match(code, /drop_pending_updates/);
+assert.match(code, /upd\.action === 'sync_registry'/);
+
+// Городской контур собирается на Mac, поэтому владельцу нужен его статус.
+assert.match(code, /'🏙 Городские жалобы'/);
+assert.match(code, /'📋 Источники'/);
+assert.match(code, /text === '\/city'/);
+assert.match(code, /text === '\/sources'/);
+assert.match(code, /function buildCityStatus_\(/);
+assert.match(code, /function buildSourcesSummary_\(/);
+
+const keyboard = sandbox.tgMainKeyboard_().keyboard.flat();
+assert.ok(keyboard.includes('🏙 Городские жалобы'), 'Кнопка городского контура на пульте');
+assert.ok(keyboard.includes('📋 Источники'), 'Кнопка сводки по источникам на пульте');
+assert.ok(keyboard.includes('▶ Проверить СМИ'), 'Старые кнопки никуда не делись');
+assert.ok(keyboard.includes('⏰ Статус'));
+
+// Apps Script всегда отвечает переадресацией, а Telegram по ней не ходит:
+// нажатия копились недоставленными. Поэтому бот переведён на опрос.
+assert.match(code, /upd\.action === 'bot_polling'/);
+assert.match(code, /function pollTelegramUpdates_\(/);
+assert.match(code, /function pollTelegramUpdatesSilent_\(/);
+assert.match(code, /everyMinutes\(1\)/);
+// Указатель сдвигается до разбора: упавшая команда не должна возвращаться вечно.
+assert.match(
+  code,
+  /props\.setProperty\('TG_POLL_OFFSET', String\(lastId \+ 1\)\);[\s\S]{0,400}handleTgMessage_/
+);
+assert.match(code, /deleteWebhook/);

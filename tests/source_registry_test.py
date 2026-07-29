@@ -36,6 +36,27 @@ assert sum(
     source["platform"] == "telegram" and source["workflow"] == "sko_mentions"
     for source in sources
 ) == 41
-assert sum(source["enabled"] is False for source in sources) == 3
+# Три недоступных сайта, десять пабликов, исчезнувших из Instagram, и группа
+# ВКонтакте, отвечающая 404.
+assert sum(source["enabled"] is False for source in sources) == 14
+
+# Контур жалоб: 23 живых паблика и блогера. Официальные редакции (pkzsk, МТРК,
+# 7152.kz и прочие) сюда не входят — их сайты уже собирает региональный поток.
+civic_instagram = [
+    source
+    for source in sources
+    if source["platform"] == "instagram"
+    and source["workflow"] == "akimat_negative"
+    and source["enabled"]
+]
+assert len(civic_instagram) == 23
+assert not [source for source in civic_instagram if source["scope"] == "regional"]
+
+# Две выверенные опечатки рабочего списка: без них лента не найдёт паблик.
+urls = {source["url"] for source in sources}
+assert "https://www.instagram.com/sko_petropavl.kz/" in urls
+assert "https://www.instagram.com/bishkul.city_/" in urls
+assert "https://www.instagram.com/sko_petropavl/" not in urls
+assert "https://www.instagram.com/bishkul.city/" not in urls
 
 print("Source registry tests: OK")

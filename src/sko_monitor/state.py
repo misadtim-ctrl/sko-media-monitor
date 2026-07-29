@@ -142,6 +142,32 @@ class StateStore:
                 (attempts, _iso(retry_at), _iso(), error[:1000], item_id),
             )
 
+    def hours_since_last_run(self, source_ids: list[str]) -> float:
+        """Сколько часов прошло с последней удачной проверки этих источников.
+
+        Нужно, чтобы после сна ноутбука догнать пропущенное: сбор идёт на Mac,
+        а он ночью выключен. Отсутствие записей означает первый запуск.
+        """
+        if not source_ids:
+            return 0.0
+        placeholders = ",".join("?" for _ in source_ids)
+        with self.connect() as db:
+            row = db.execute(
+                f"SELECT MAX(last_success) AS last FROM source_state "  # noqa: S608
+                f"WHERE source_id IN ({placeholders})",
+                source_ids,
+            ).fetchone()
+        raw = row["last"] if row else None
+        if not raw:
+            return 0.0
+        try:
+            last = datetime.fromisoformat(raw)
+        except ValueError:
+            return 0.0
+        if last.tzinfo is None:
+            last = last.replace(tzinfo=UTC)
+        return max(0.0, (datetime.now(UTC) - last).total_seconds() / 3600)
+
     def record_source_run(self, run: SourceRun) -> None:
         checked = _iso(run.checked_at)
         with self.connect() as db:

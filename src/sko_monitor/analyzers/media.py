@@ -11,6 +11,7 @@ import httpx
 
 from ..config import Settings
 from ..models import Publication
+from . import macos_media
 
 
 class MediaAnalyzer:
@@ -91,11 +92,16 @@ class MediaAnalyzer:
 
     @staticmethod
     def _ocr(path: Path) -> str:
+        # На Mac сбор идёт без Homebrew, поэтому tesseract может отсутствовать.
+        # Vision из самой macOS распознаёт русский не хуже и не требует прав
+        # администратора, так что он первый в очереди на этой системе.
+        if not shutil.which("tesseract") and macos_media.available():
+            return macos_media.recognise_text(path)
         try:
             import pytesseract
             from PIL import Image, ImageEnhance, ImageOps
         except ImportError:
-            return ""
+            return macos_media.recognise_text(path) if macos_media.available() else ""
         try:
             with Image.open(path) as image:
                 image = ImageOps.grayscale(image)
@@ -110,7 +116,9 @@ class MediaAnalyzer:
     @staticmethod
     def _frames(video: Path, output_dir: Path) -> list[Path]:
         if not shutil.which("ffmpeg"):
-            return []
+            # Жалоба всё чаще приходит одним видео без подписи, и весь её текст
+            # виден только на кадрах. AVFoundation достаёт их без ffmpeg.
+            return macos_media.video_frames(video, output_dir, count=6)
         output_dir.mkdir(parents=True, exist_ok=True)
         pattern = output_dir / "frame-%03d.jpg"
         command = [

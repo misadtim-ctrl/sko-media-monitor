@@ -6,6 +6,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -14,6 +15,7 @@ from .analyzers.semantic import SemanticScorer
 from .collectors import (
     Collector,
     InstagramCollector,
+    InstagramFeedCollector,
     SocialPageCollector,
     TelegramCollector,
     WebsiteCollector,
@@ -43,6 +45,9 @@ class RunReport:
     bridge_attempted: bool = False
     bridge_delivered: bool = False
     bridge_error: str = ""
+    feed_posts: int = 0
+    feed_unknown: list[str] = field(default_factory=list)
+    lookback_hours: float = 0.0
     errors: list[str] = field(default_factory=list)
     results: list[dict] = field(default_factory=list)
 
@@ -60,6 +65,9 @@ class RunReport:
             "bridge_attempted": self.bridge_attempted,
             "bridge_delivered": self.bridge_delivered,
             "bridge_error": self.bridge_error,
+            "feed_posts": self.feed_posts,
+            "feed_unknown": self.feed_unknown,
+            "lookback_hours": self.lookback_hours,
             "errors": self.errors,
         }
 
@@ -73,7 +81,12 @@ class MonitorPipeline:
 
     async def run(self, mode: str, lookback_hours: int = 72) -> RunReport:
         sources = self._select_sources(mode)
-        report = RunReport(sources_total=len(sources))
+        # Лента подписок отдаёт свежие посты всех пабликов одним запросом, поэтому
+        # она обслуживает весь список Instagram, а обход по профилям остаётся лишь
+        # маленькой ротацией-страховкой внутри `sources`.
+        feed_sources = self._feed_sources(mode)
+        counted = {source.id for source in sources} | {source.id for source in feed_sources}
+        report = RunReport(sources_total=len(counted))
         run_seen: set[str] = set()
         pending_memory: list[tuple[tuple[str, ...], str, bool, bool]] = []
         timeout = httpx.Timeout(self.settings.request_timeout)
@@ -114,8 +127,16 @@ class MonitorPipeline:
                     elapsed = round((time.monotonic() - started) * 1000)
                     return source, [], str(exc), elapsed
 
+            # Сбор Instagram идёт на Mac, а он ночью выключен. После простоя
+            # окно расширяется на весь пропуск, иначе утренний запуск потеряет
+            # всё, что паблики опубликовали вечером. Повторов это не создаёт:
+            # отправленное помнят и локальная база, и таблица Apps Script.
+            gap = self.state.hours_since_last_run([source.id for source in feed_sources])
+            effective_lookback = min(24.0, max(float(max(1, lookback_hours)), gap + 1.0))
+            report.lookback_hours = round(effective_lookback, 1)
+            cutoff = datetime.now(UTC) - timedelta(hours=effective_lookback)
             batches = await asyncio.gather(*(collect_source(source) for source in sources))
-            cutoff = datetime.now(UTC) - timedelta(hours=max(1, lookback_hours))
+            batches = await self._merge_feed(batches, feed_sources, cutoff, report, gap)
 
             for source, publications, error, elapsed in batches:
                 ok = not error
@@ -231,32 +252,103 @@ class MonitorPipeline:
                 break
         return sent
 
-    def _select_sources(self, mode: str) -> list[Source]:
+    async def _merge_feed(
+        self,
+        batches: tuple[tuple[Source, list[Publication], str, int], ...],
+        feed_sources: list[Source],
+        cutoff: datetime,
+        report: RunReport,
+        gap_hours: float = 0.0,
+    ) -> list[tuple[Source, list[Publication], str, int]]:
+        """Добавляет посты из ленты подписок к результатам обычного обхода."""
+        merged: dict[str, list] = {
+            source.id: [source, list(publications), error, elapsed]
+            for source, publications, error, elapsed in batches
+        }
+        if not feed_sources:
+            return [tuple(row) for row in merged.values()]
+        started = time.monotonic()
+        try:
+            # Обычно хватает трёх страниц, но после ночного простоя лента
+            # содержит гораздо больше, и её надо пролистать глубже.
+            pages = self.settings.instagram_feed_pages
+            if gap_hours > 1.0:
+                pages = min(self.settings.instagram_feed_catchup_pages, pages + int(gap_hours) * 2)
+            grouped, unknown = await InstagramFeedCollector(self.settings).collect(
+                feed_sources, cutoff, pages=pages
+            )
+        except Exception as exc:
+            # Причину пишем один раз подробно, а паблики помечаем непроверенными:
+            # 26 несобранных источников — это честная картина, её и показываем.
+            LOGGER.warning("Instagram feed failed: %s", exc)
+            report.errors.append(f"Лента Instagram: {exc}")
+            elapsed = round((time.monotonic() - started) * 1000)
+            for source in feed_sources:
+                merged.setdefault(source.id, [source, [], "лента Instagram недоступна", elapsed])
+            return [tuple(row) for row in merged.values()]
+        elapsed = round((time.monotonic() - started) * 1000)
+        for source in feed_sources:
+            publications = grouped.get(source.id, [])
+            row = merged.get(source.id)
+            if row is None:
+                merged[source.id] = [source, publications, "", elapsed]
+            else:
+                row[1].extend(publications)
+        report.feed_posts = sum(len(items) for items in grouped.values())
+        # Паблик может быть в реестре, но в другом потоке — например, редакции
+        # вроде pkzsk собираются как региональные СМИ. Незнакомыми считаем лишь
+        # тех, кого реестр не знает вовсе.
+        known = {
+            urlsplit(source.url).path.strip("/").split("/", 1)[0].lower()
+            for source in load_sources(self.settings.registry_path)
+            if source.platform == "instagram"
+        }
+        report.feed_unknown = sorted(set(unknown) - known)
+        if report.feed_unknown:
+            # Аккаунт подписан на паблики, которых нет в реестре. Это не ошибка,
+            # но именно такое расхождение когда-то оставило мониторинг без части
+            # источников, поэтому список виден в отчёте.
+            LOGGER.info("Подписки вне реестра: %s", ", ".join(sorted(unknown)))
+        return [tuple(row) for row in merged.values()]
+
+    def _feed_sources(self, mode: str) -> list[Source]:
+        if not self.settings.instagram_use_feed:
+            return []
+        return [source for source in self._mode_sources(mode) if source.platform == "instagram"]
+
+    def _mode_sources(self, mode: str) -> list[Source]:
         sources = [source for source in load_sources(self.settings.registry_path) if source.enabled]
+        if not self.settings.instagram_enabled:
+            sources = [source for source in sources if source.platform != "instagram"]
         if mode == "main":
             return [source for source in sources if source.workflow == "sko_mentions"]
         if mode == "negative":
-            civic_sources = [
-                source for source in sources if source.workflow == "akimat_negative"
-            ]
-            if self.settings.meta_access_token and self.settings.meta_ig_user_id:
-                return civic_sources
-            instagram_sources = [
-                source for source in civic_sources if source.platform == "instagram"
-            ]
-            selected_ids = set(
-                self.state.oldest_source_ids(
-                    [source.id for source in instagram_sources],
-                    self.settings.instagram_profiles_per_run,
-                )
-            )
-            return [
-                source
-                for source in civic_sources
-                if source.platform != "instagram" or source.id in selected_ids
-            ]
+            return [source for source in sources if source.workflow == "akimat_negative"]
         if mode == "regional":
             return [source for source in sources if source.workflow == "regional_news"]
         if mode == "all":
             return sources
         raise ValueError(f"Unknown mode: {mode}")
+
+    def _select_sources(self, mode: str) -> list[Source]:
+        sources = self._mode_sources(mode)
+        if mode != "negative":
+            return sources
+        if self.settings.meta_access_token and self.settings.meta_ig_user_id:
+            return sources
+        instagram_sources = [source for source in sources if source.platform == "instagram"]
+        # При работающей ленте обход по профилям нужен только как страховка от
+        # её ранжирования, поэтому за прогон берём пару профилей, а не тридцать.
+        quota = (
+            self.settings.instagram_sweep_profiles
+            if self.settings.instagram_use_feed
+            else self.settings.instagram_profiles_per_run
+        )
+        selected_ids = set(
+            self.state.oldest_source_ids([source.id for source in instagram_sources], quota)
+        )
+        return [
+            source
+            for source in sources
+            if source.platform != "instagram" or source.id in selected_ids
+        ]

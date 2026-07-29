@@ -20,6 +20,14 @@ instagram = ["instaloader>=4.13,<5", "browser-cookie3>=0.20,<1"]
 semantic = ["sentence-transformers>=3.0,<6"]
 media = ["pytesseract>=0.3.13,<1", "Pillow>=10,<13"]
 video = ["faster-whisper>=1.1,<2", "yt-dlp>=2025.1.1"]
+# Разбор картинок и видео силами самой macOS: Vision читает текст, включая
+# русский, AVFoundation достаёт кадры. Нужно там, где нет Homebrew, а значит
+# нет ни tesseract, ни ffmpeg — то есть на рабочем Mac.
+macos = [
+  "pyobjc-framework-Vision>=10,<13; sys_platform == 'darwin'",
+  "pyobjc-framework-Quartz>=10,<13; sys_platform == 'darwin'",
+  "pyobjc-framework-AVFoundation>=10,<13; sys_platform == 'darwin'",
+]
 dev = [
   "pytest>=8,<10",
   "pytest-asyncio>=0.24,<2",

@@ -13,3 +13,5 @@ exports/
 *.session
 *.sqlite3*
 apps-script/Code.original.gs
+backup/
+logs/

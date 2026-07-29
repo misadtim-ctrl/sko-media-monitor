@@ -547,10 +547,10 @@ var SOURCE_REGISTRY = [
     "docx_rows": []
   },
   {
-    "id": "instagram-sko-petropavl",
+    "id": "instagram-sko-petropavl-kz",
     "name": "Sko_petropavl",
     "platform": "instagram",
-    "url": "https://www.instagram.com/sko_petropavl/",
+    "url": "https://www.instagram.com/sko_petropavl.kz/",
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
@@ -719,7 +719,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -820,7 +820,7 @@ var SOURCE_REGISTRY = [
     "id": "instagram-bishkul-city",
     "name": "Bishkul.city_",
     "platform": "instagram",
-    "url": "https://www.instagram.com/bishkul.city/",
+    "url": "https://www.instagram.com/bishkul.city_/",
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
@@ -869,7 +869,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -899,7 +899,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -944,7 +944,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -974,7 +974,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -989,7 +989,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -1049,7 +1049,7 @@ var SOURCE_REGISTRY = [
     "scope": "local_public",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -1289,7 +1289,7 @@ var SOURCE_REGISTRY = [
     "scope": "regional",
     "workflow": "regional_news",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -2129,7 +2129,7 @@ var SOURCE_REGISTRY = [
     "scope": "civic_watch",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -2219,7 +2219,7 @@ var SOURCE_REGISTRY = [
     "scope": "civic_watch",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [
@@ -2279,7 +2279,7 @@ var SOURCE_REGISTRY = [
     "scope": "civic_watch",
     "workflow": "akimat_negative",
     "owners": [],
-    "enabled": true,
+    "enabled": false,
     "notes": "из рабочего списка РСК",
     "aliases": [],
     "docx_rows": [

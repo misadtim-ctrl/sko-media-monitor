@@ -666,6 +666,20 @@ function loadSources_() {
       .forEach(function(s) { sources.push({ url: s.url, name: s.name }); });
   } catch (eRegistry) {}
 
+  // Республиканские Telegram-каналы. Раньше сюда попадали только сайты, и
+  // 41 канал из рабочего списка не проверял никто: Python-контур отключён,
+  // а этот фильтр их не брал. У доброго десятка изданий — «Чиновник»,
+  // «За нами уже выехали», «Письма Президенту», Qazaqparat — сайта нет
+  // вообще, так что канал был их единственной, полностью слепой площадкой.
+  // Читаем открытую веб-версию t.me/s/имя: бесплатно, без API и токенов.
+  try {
+    loadRegistrySources_({ scope: 'republican', platform: 'telegram', workflow: 'sko_mentions' })
+      .forEach(function(s) {
+        var channel = telegramChannelFromUrl_(s.url);
+        if (channel) sources.push({ url: 'https://t.me/s/' + channel, name: s.name });
+      });
+  } catch (eTelegram) {}
+
   var seen = {};
   return sources.filter(function(s) {
     var key = urlKey_(s.url);
@@ -673,6 +687,60 @@ function loadSources_() {
     seen[key] = true;
     return true;
   });
+}
+
+// Сдвигает начало списка от прогона к прогону.
+//
+// Обход прерывается по лимиту времени, а начинался всегда с первого источника
+// — значит хвост списка при каждом обрыве терялся один и тот же и не
+// проверялся никогда. Сдвиг делает потери случайными: источник, пропущенный
+// сейчас, окажется в начале следующего прогона. Порядок внутри сохраняется,
+// поэтому поведение при укладывании в лимит не меняется вовсе.
+function rotateSources_(sources) {
+  if (!sources || sources.length < 2) return sources || [];
+  var props = PropertiesService.getScriptProperties();
+  var cursor = Number(props.getProperty('SKO_SOURCE_CURSOR') || 0);
+  if (!isFinite(cursor) || cursor < 0) cursor = 0;
+  cursor = cursor % sources.length;
+  var step = Math.max(1, Math.round(sources.length / 4));
+  props.setProperty('SKO_SOURCE_CURSOR', String((cursor + step) % sources.length));
+  return sources.slice(cursor).concat(sources.slice(0, cursor));
+}
+
+// Имя канала из любой ссылки вида t.me/имя, t.me/s/имя или web.telegram.org.
+function telegramChannelFromUrl_(url) {
+  var match = String(url || '').match(/t\.me\/(?:s\/)?([A-Za-z0-9_]{3,})/i);
+  if (match) return match[1];
+  match = String(url || '').match(/web\.telegram\.org\/[^#]*#@?([A-Za-z0-9_]{3,})/i);
+  return match ? match[1] : '';
+}
+
+// Разбор открытой веб-версии канала. Формат тот же, что читает инструмент
+// «Паблики», но здесь дополнительно берём дату из <time datetime>: без неё
+// суточный фильтр свежести пропускал бы старые посты в канал.
+function extractTelegramItems_(html) {
+  var items = [];
+  var blocks = String(html || '').split('data-post="');
+  for (var i = 1; i < blocks.length; i++) {
+    var block = blocks[i];
+    var idMatch = block.match(/^([A-Za-z0-9_]+\/\d+)"/);
+    if (!idMatch) continue;
+
+    var textMatch = block.match(/tgme_widget_message_text[^>]*>([\s\S]*?)<\/div>/i);
+    var text = textMatch ? clean_(strip_(textMatch[1])) : '';
+    // Короткие подписи под картинкой и служебные посты пропускаем: по ним
+    // нельзя понять, о какой области речь, а в канал они уйдут шумом.
+    if (text.length < 25) continue;
+
+    var timeMatch = block.match(/<time[^>]*\bdatetime="([^"]+)"/i);
+    items.push({
+      title: text.length > 200 ? text.slice(0, 200) + '…' : text,
+      url: 'https://t.me/' + idMatch[1],
+      extra: text.length > 200 ? text.slice(200, 1200) : '',
+      pubDate: timeMatch ? parsePublicationDate_(timeMatch[1]) : null
+    });
+  }
+  return items;
 }
 
 
@@ -1087,7 +1155,7 @@ function runSkoCheckSilent() {
 function runSkoCheckCore_() {
   var started = Date.now();
 
-  var sources = loadSources_();
+  var sources = rotateSources_(loadSources_());
   // Региональные СМИ в общий мониторинг НЕ входят (решение пользователя):
   // республиканский поток — только республика. Регионалки живут отдельно:
   // кнопки "Позитив" и "Глубокий поиск".
@@ -1177,7 +1245,9 @@ function runSkoCheckCore_() {
     }
     trackSourceOk_(src.name);
 
-    var items = extractItems_(res.body, res.url);
+    var items = hostOf_(src.url) === 't.me'
+      ? extractTelegramItems_(res.body)
+      : extractItems_(res.body, res.url);
     if (!items.length) { skoLog_('Пусто', src.name); siteReport.push(src.name + ':0'); continue; }
 
     var staleLimit = new Date(Date.now() - 24 * 60 * 60 * 1000);   // только сутки
@@ -3372,10 +3442,92 @@ function tgMainKeyboard_() {
     keyboard: [
       ['▶ Проверить СМИ', '📺 YouTube'],
       ['🌿 Позитив', '📊 Сводка за сегодня'],
+      ['🏙 Городские жалобы', '📋 Источники'],
       ['⏰ Статус']
     ],
     resize_keyboard: true
   };
+}
+
+// Состояние городского контура. Он собирается не здесь, а на Mac, и о себе
+// сообщает через мост. Владельцу важно не «работает или нет», а живо ли
+// соединение и когда был последний сбор: ночью Mac выключен, и это норма.
+function buildCityStatus_() {
+  var props = PropertiesService.getScriptProperties();
+  var tz = Session.getScriptTimeZone();
+  var beat = Number(props.getProperty('PY_LAST_HEARTBEAT') || 0);
+  var report = {};
+  try { report = JSON.parse(props.getProperty('PY_LAST_REPORT') || '{}'); } catch (eParse) {}
+
+  var lines = ['🏙 <b>Городские жалобы (Instagram)</b>', ''];
+  if (!beat) {
+    lines.push('Сборщик ещё ни разу не выходил на связь.');
+    lines.push('Проверь, включён ли он на Mac: instagram-schedule.command');
+    return lines.join('\n');
+  }
+
+  var mins = Math.round((Date.now() - beat) / 60000);
+  var ago = mins < 60 ? mins + ' мин назад'
+    : (mins < 1440 ? Math.round(mins / 60) + ' ч назад' : Math.round(mins / 1440) + ' дн назад');
+  lines.push('Последний сбор: ' +
+    Utilities.formatDate(new Date(beat), tz, 'dd.MM HH:mm') + '  •  ' + ago);
+  lines.push(mins <= 90 ? '🟢 Сборщик на связи'
+    : (mins <= 180 ? '🟡 Молчит дольше обычного' : '🔴 Mac выключен или спит'));
+  lines.push('');
+  lines.push('Проверено источников: ' + (report.sources_ok || 0) +
+    ' из ' + (report.sources_total || 0));
+  lines.push('Постов из ленты: ' + (report.feed_posts || 0));
+  lines.push('Отобрано жалоб: ' + (report.relevant || 0) +
+    ', на проверку: ' + (report.needs_review || 0));
+
+  if (report.bridge_attempted === true) {
+    lines.push('Передача в таблицу: ' +
+      (report.bridge_delivered === true ? '✅ принято' : '❌ не принято'));
+    if (report.bridge_delivered !== true && report.bridge_error) {
+      lines.push('Причина: ' + tgEsc_(String(report.bridge_error).slice(0, 200)));
+    }
+  } else {
+    lines.push('Передавать было нечего — новых жалоб нет.');
+  }
+
+  var unknown = report.feed_unknown || [];
+  if (unknown.length) {
+    lines.push('');
+    lines.push('В ленте есть паблики вне реестра: ' + tgEsc_(unknown.slice(0, 6).join(', ')));
+  }
+  var errors = report.errors || [];
+  if (errors.length) {
+    lines.push('');
+    lines.push('Ошибок в последнем сборе: ' + errors.length);
+    lines.push(tgEsc_(String(errors[0]).slice(0, 180)));
+  }
+  return lines.join('\n');
+}
+
+// Сводка по источникам: сколько и чего реально попадает в обход.
+function buildSourcesSummary_() {
+  var lines = ['📋 <b>Источники мониторинга</b>', ''];
+  try {
+    var sources = loadSources_();
+    var telegram = 0, sites = 0;
+    sources.forEach(function(s) {
+      if (hostOf_(s.url) === 't.me') telegram++; else sites++;
+    });
+    lines.push('Главный обход: ' + sources.length + ' источников');
+    lines.push('   • сайтов: ' + sites);
+    lines.push('   • Telegram-каналов: ' + telegram);
+  } catch (eMain) {
+    lines.push('Не удалось прочитать список: ' + tgEsc_(eMain.message || String(eMain)));
+  }
+  try {
+    var civic = loadRegistrySources_({ workflow: 'akimat_negative', platform: 'instagram' });
+    lines.push('');
+    lines.push('Городские паблики Instagram: ' + civic.length + ' (собираются на Mac)');
+  } catch (eCivic) {}
+  lines.push('');
+  lines.push('Включить или выключить источник — галочкой на листе');
+  lines.push('«РЕЕСТР ИСТОЧНИКОВ» в таблице.');
+  return lines.join('\n');
 }
 
 function jsonOutput_(payload) {
@@ -3732,6 +3884,173 @@ function telegramDeliveryStatus_(payload) {
   };
 }
 
+// Опрос Telegram вместо вебхука.
+//
+// Apps Script на любой запрос отвечает переадресацией на внутренний адрес
+// Google, а Telegram по переадресациям принципиально не ходит: он считает
+// доставку неудачной и копит нажатия у себя. Поэтому направление
+// переворачивается — скрипт сам раз в минуту спрашивает, нет ли новых команд.
+// Работает надёжно, ценой задержки до минуты на нажатие.
+function pollTelegramUpdates_() {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('TG_TOKEN');
+  if (!token) return 0;
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(1000)) return 0;   // предыдущий опрос ещё разбирает команду
+  try {
+    var offset = Number(props.getProperty('TG_POLL_OFFSET') || 0);
+    var url = 'https://api.telegram.org/bot' + token + '/getUpdates' +
+      '?timeout=0&limit=10&allowed_updates=' + encodeURIComponent('["message"]') +
+      (offset ? '&offset=' + offset : '');
+    var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) {
+      skoLog_('TG опрос HTTP', resp.getResponseCode() + ' ' + resp.getContentText().slice(0, 200));
+      return 0;
+    }
+    var data = JSON.parse(resp.getContentText());
+    var updates = (data && data.result) || [];
+    if (!updates.length) return 0;
+
+    // Сдвигаем указатель СРАЗУ. Если команда окажется долгой или упадёт,
+    // она не будет приходить снова и снова при каждом следующем опросе.
+    var lastId = updates[updates.length - 1].update_id;
+    props.setProperty('TG_POLL_OFFSET', String(lastId + 1));
+
+    var handled = 0;
+    for (var i = 0; i < updates.length; i++) {
+      try {
+        if (updates[i] && updates[i].message) {
+          handleTgMessage_(updates[i].message);
+          handled++;
+        }
+      } catch (eOne) {
+        skoLog_('TG команда упала', (eOne && eOne.message) || String(eOne));
+      }
+    }
+    return handled;
+  } catch (err) {
+    skoLog_('TG опрос ошибка', (err && err.message) || String(err));
+    return 0;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Переключает бота на опрос: снимает вебхук и ставит триггер раз в минуту.
+function enableTelegramPollingSecure_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  var token = props.getProperty('TG_TOKEN');
+  if (!token) return { ok: false, error: 'Токен Telegram не сохранён' };
+
+  // Вебхук и опрос несовместимы: пока стоит вебхук, getUpdates отвечает 409.
+  // Накопившиеся нажатия не сбрасываем — они разберутся первым же опросом.
+  var deleteResp = UrlFetchApp.fetch(
+    'https://api.telegram.org/bot' + token + '/deleteWebhook',
+    { method: 'post', muteHttpExceptions: true }
+  );
+
+  var existing = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].getHandlerFunction() === 'pollTelegramUpdatesSilent_') {
+      ScriptApp.deleteTrigger(existing[i]);
+    }
+  }
+  ScriptApp.newTrigger('pollTelegramUpdatesSilent_').timeBased().everyMinutes(1).create();
+
+  var handled = pollTelegramUpdates_();
+  skoLog_('TG опрос включён', 'Разобрано накопившихся команд: ' + handled);
+  return {
+    ok: true,
+    webhook_removed: deleteResp.getContentText().slice(0, 120),
+    handled_now: handled,
+    triggers: ScriptApp.getProjectTriggers().map(function(t) { return t.getHandlerFunction(); })
+  };
+}
+
+function pollTelegramUpdatesSilent_() {
+  try { pollTelegramUpdates_(); } catch (e) {}
+}
+
+// Включает личное меню бота и показывает, что о нём думает Telegram.
+//
+// Кнопки в боте были написаны давно, но не работали: Telegram не знал, куда
+// слать нажатия. Раньше вебхук ставился только из меню таблицы и всегда на
+// адрес `ScriptApp.getService().getUrl()`, а он указывает на самое первое
+// развёртывание — то, которое отвечает 401 и давно мертво. Поэтому адрес
+// можно передать явно: ставим на тот, что реально живой.
+function botMenuSecure_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  var token = props.getProperty('TG_TOKEN');
+  if (!token) return { ok: false, error: 'Токен Telegram не сохранён' };
+
+  var result = {
+    ok: true,
+    admin: props.getProperty('TG_ADMIN') || '',
+    service_url: ScriptApp.getService().getUrl() || ''
+  };
+
+  if (payload.url) {
+    var setResp = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/setWebhook', {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({
+        url: String(payload.url),
+        allowed_updates: ['message'],
+        drop_pending_updates: true
+      }),
+      muteHttpExceptions: true
+    });
+    result.set_result = setResp.getContentText().slice(0, 300);
+    skoLog_('TG меню', 'Вебхук переставлен на ' + String(payload.url).slice(-24));
+  }
+
+  var infoResp = UrlFetchApp.fetch(
+    'https://api.telegram.org/bot' + token + '/getWebhookInfo',
+    { muteHttpExceptions: true }
+  );
+  var info = {};
+  try { info = (JSON.parse(infoResp.getContentText()) || {}).result || {}; } catch (eInfo) {}
+  result.webhook_url = info.url || '';
+  result.pending_updates = info.pending_update_count || 0;
+  result.last_error = info.last_error_message || '';
+  return result;
+}
+
+// Заполняет лист «РЕЕСТР ИСТОЧНИКОВ» из встроенного реестра.
+//
+// Раньше это делалось только вручную через меню таблицы, и лист остался
+// незаполненным: главный обход брал источники исключительно из старого листа
+// ИСТОЧНИКИ, а 41 республиканский Telegram-канал не попадал никуда. Действие
+// повторяемо — добавляются только отсутствующие адреса, а снятые вручную
+// галочки и правки пользователя сохраняются.
+function syncRegistrySecure_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
+  if (!expected || !payload || payload.secret !== expected) {
+    return { ok: false, error: 'unauthorized' };
+  }
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { ok: false, error: 'busy' };
+  try {
+    var added = ensureSourceRegistry_();
+    var sources = loadSources_();
+    var telegram = sources.filter(function(s) { return hostOf_(s.url) === 't.me'; }).length;
+    skoLog_('Реестр обновлён', 'Добавлено адресов: ' + added + ', Telegram в обходе: ' + telegram);
+    return { ok: true, added: added, sources: sources.length, telegram: telegram };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function runMainCheckSecure_(payload) {
   var props = PropertiesService.getScriptProperties();
   var expected = props.getProperty('MONITOR_WEBHOOK_SECRET');
@@ -3762,6 +4081,9 @@ function doPost(e) {
     if (upd && upd.action === 'negative_status') return jsonOutput_(negativeChannelStatus_(upd));
     if (upd && upd.action === 'delivery_status') return jsonOutput_(telegramDeliveryStatus_(upd));
     if (upd && upd.action === 'run_main_check') return jsonOutput_(runMainCheckSecure_(upd));
+    if (upd && upd.action === 'sync_registry') return jsonOutput_(syncRegistrySecure_(upd));
+    if (upd && upd.action === 'bot_menu') return jsonOutput_(botMenuSecure_(upd));
+    if (upd && upd.action === 'bot_polling') return jsonOutput_(enableTelegramPollingSecure_(upd));
 
     if (captureNegativeChannel_(upd)) return ContentService.createTextOutput('ok');
 
@@ -3856,6 +4178,16 @@ function handleTgMessage_(msg) {
 
   if (text === '📊 Сводка за сегодня' || text === '/today') {
     sendTgChat_(chatId, buildDailySummary_(), tgMainKeyboard_());
+    return;
+  }
+
+  if (text === '🏙 Городские жалобы' || text === '/city') {
+    sendTgChat_(chatId, buildCityStatus_(), tgMainKeyboard_());
+    return;
+  }
+
+  if (text === '📋 Источники' || text === '/sources') {
+    sendTgChat_(chatId, buildSourcesSummary_(), tgMainKeyboard_());
     return;
   }
 

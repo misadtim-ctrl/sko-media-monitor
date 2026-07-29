@@ -42,6 +42,11 @@ class Settings:
     instagram_min_delay_seconds: float
     instagram_profiles_per_run: int
     instagram_posts_per_profile: int
+    instagram_enabled: bool
+    instagram_use_feed: bool
+    instagram_feed_pages: int
+    instagram_feed_catchup_pages: int
+    instagram_sweep_profiles: int
     meta_access_token: str
     meta_ig_user_id: str
     meta_graph_version: str
@@ -82,6 +87,22 @@ class Settings:
                 1, int(os.getenv("INSTAGRAM_PROFILES_PER_RUN", "32"))
             ),
             instagram_posts_per_profile=max(1, int(os.getenv("INSTAGRAM_POSTS_PER_PROFILE", "8"))),
+            # Instagram отвечает 429 на любой адрес дата-центра, поэтому в облаке
+            # его выключают целиком: собирать нечего, а лишний показ сохранённого
+            # входа с чужого адреса — прямой риск для аккаунта.
+            instagram_enabled=_bool_env("INSTAGRAM_ENABLED", True),
+            # Чтение ленты работает только с жилого адреса, поэтому по умолчанию
+            # выключено: в GitHub Actions оно всё равно упрётся в 429.
+            instagram_use_feed=_bool_env("INSTAGRAM_USE_FEED", False),
+            instagram_feed_pages=max(1, int(os.getenv("INSTAGRAM_FEED_PAGES", "3"))),
+            # Потолок на догоняющий обход после сна ноутбука: ночь простоя не
+            # должна превращаться в бесконечное листание ленты.
+            instagram_feed_catchup_pages=max(
+                1, int(os.getenv("INSTAGRAM_FEED_CATCHUP_PAGES", "15"))
+            ),
+            # Страховка от ранжирования ленты: за прогон дополнительно проверяем
+            # пару профилей по очереди, так весь список обходится за ~2 часа.
+            instagram_sweep_profiles=max(0, int(os.getenv("INSTAGRAM_SWEEP_PROFILES", "2"))),
             meta_access_token=os.getenv("META_ACCESS_TOKEN", "").strip(),
             meta_ig_user_id=os.getenv("META_IG_USER_ID", "").strip(),
             meta_graph_version=os.getenv("META_GRAPH_VERSION", "v22.0").strip(),

@@ -97,6 +97,51 @@ TRACKING_KEYS = {
 }
 URL_RE = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
+# Проверено обращением к Instagram 26.07.2026: в ссылках рабочего списка эти
+# имена записаны с ошибкой, а сами паблики живы. У Бишкуля верное имя стоит в
+# том же документе в колонке названия — потерялось подчёркивание в ссылке.
+INSTAGRAM_HANDLE_FIXES = {
+    "sko_petropavl": "sko_petropavl.kz",
+    "bishkul.city": "bishkul.city_",
+}
+
+# Проверено тем же обходом: этих аккаунтов в Instagram больше нет, а поиск по
+# названию не находит переехавших. Записи остаются в реестре выключенными, а не
+# удаляются: так видно, что паблик из распределения РСК потерян, и ответственный
+# по документу человек мониторит пустоту.
+INSTAGRAM_RETIRED = {
+    "sko_vmeste",
+    "v_ritme_sko",
+    "my_life_petropavlovsk",
+    "petro_fakt",
+    "sko_inform",
+    "trends.petro",
+    "social_media_kz",
+    "osdp.sko.petro",
+    "mk.ablyazov",
+    "vadimkuramshininfo",
+}
+
+
+# Проверено 27.07.2026: страница отвечает 404. Группа либо переименована, либо
+# закрыта, а ошибка повторялась в каждом прогоне и зашумляла отчёт.
+RETIRED_URLS = {
+    "https://vk.com/obovsempetropavlovsk/",
+}
+
+
+def instagram_handle(url: str) -> str:
+    return urlsplit(url).path.strip("/").split("/", 1)[0].lower()
+
+
+def apply_instagram_corrections(url: str) -> tuple[str, bool]:
+    """Возвращает выверенную ссылку и признак «паблик ещё существует»."""
+    handle = instagram_handle(url)
+    fixed = INSTAGRAM_HANDLE_FIXES.get(handle, handle)
+    if fixed != handle:
+        url = f"https://www.instagram.com/{fixed}/"
+    return url, fixed not in INSTAGRAM_RETIRED
+
 
 def normalize_url(raw: str) -> str:
     raw = raw.strip().rstrip(".,;)")
@@ -207,6 +252,9 @@ def build_registry(docx_path: Path) -> dict:
         for raw_url in URL_RE.findall(links_cell):
             url = normalize_url(raw_url)
             platform = platform_for(url)
+            enabled = url not in RETIRED_URLS
+            if platform == "instagram":
+                url, enabled = apply_instagram_corrections(url)
             add_source(
                 registry,
                 {
@@ -217,7 +265,7 @@ def build_registry(docx_path: Path) -> dict:
                     "scope": scope,
                     "workflow": workflow,
                     "owners": [],
-                    "enabled": True,
+                    "enabled": enabled,
                     "notes": "из рабочего списка РСК",
                     "aliases": [],
                     "docx_rows": [row_number],

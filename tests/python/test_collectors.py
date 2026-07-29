@@ -151,3 +151,22 @@ async def test_instagram_pauses_remaining_profiles_after_rate_limit(monkeypatch,
             await collector.collect(source)
 
     assert calls == 1
+
+
+def test_macos_reads_frames_when_ffmpeg_is_absent(monkeypatch, tmp_path) -> None:
+    # На рабочем Mac нет Homebrew, значит нет ffmpeg и tesseract. Разбор видео
+    # без подписи обязан всё равно состояться — средствами самой macOS.
+    import sko_monitor.analyzers.media as media_module
+
+    monkeypatch.setattr(media_module.shutil, "which", lambda name: None)
+    monkeypatch.setattr(media_module.macos_media, "available", lambda: True)
+    monkeypatch.setattr(
+        media_module.macos_media, "video_frames", lambda video, out, count=6: [out / "f.png"]
+    )
+    monkeypatch.setattr(
+        media_module.macos_media, "recognise_text", lambda path: "Нет воды третьи сутки"
+    )
+
+    frames = media_module.MediaAnalyzer._frames(tmp_path / "reel.mp4", tmp_path / "frames")
+    assert frames == [tmp_path / "frames" / "f.png"]
+    assert media_module.MediaAnalyzer._ocr(tmp_path / "f.png") == "Нет воды третьи сутки"

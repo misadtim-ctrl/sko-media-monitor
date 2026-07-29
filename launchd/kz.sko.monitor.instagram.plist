@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>kz.sko.monitor.instagram</string>
+
+    <!-- Полный путь: launchd не знает про домашний каталог пользователя. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-lc</string>
+        <string>exec "$HOME/sko-monitor/run_instagram_feed.sh"</string>
+    </array>
+
+    <!-- Раз в 40 минут. Требование «пост не старше часа» выполняется с запасом,
+         а нагрузка на аккаунт втрое меньше, чем при десятиминутном опросе. -->
+    <key>StartInterval</key>
+    <integer>2400</integer>
+
+    <!-- Запуск сразу при входе в систему, чтобы после перезагрузки не ждать. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/mihailtimosenko/sko-monitor</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/mihailtimosenko/sko-monitor/logs/instagram-feed.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/mihailtimosenko/sko-monitor/logs/instagram-feed.err.log</string>
+
+    <!-- Один прогон занимает секунды; получаса хватает на самый тяжёлый случай,
+         после чего задача снимается, чтобы зависший запрос не копил процессы. -->
+    <key>ExitTimeOut</key>
+    <integer>1800</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>

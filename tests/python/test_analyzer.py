@@ -177,3 +177,81 @@ def test_semantic_similarity_cannot_publish_negative_without_rules() -> None:
     )
     assert not result.relevant
     assert result.needs_review
+
+
+def _complaint(text: str):
+    from datetime import UTC, datetime
+
+    from sko_monitor.analyzers import PublicationAnalyzer
+    from sko_monitor.analyzers.semantic import SemanticScorer
+    from sko_monitor.models import Publication
+
+    analyzer = PublicationAnalyzer(SemanticScorer("", False))
+    return analyzer.analyze(
+        Publication(
+            source_id="x",
+            source_name="Паблик",
+            platform="instagram",
+            workflow="akimat_negative",
+            url="https://www.instagram.com/p/X/",
+            title=text[:70],
+            text=text,
+            published_at=datetime.now(UTC),
+        )
+    )
+
+
+def test_complaint_survives_words_inserted_into_the_marker() -> None:
+    # «нет воды» искалось дословно, поэтому живая формулировка проходила мимо.
+    assert _complaint("В Петропавловске третьи сутки нет холодной воды").relevant
+    assert _complaint("Опять отключили горячую воду без предупреждения").relevant
+
+
+def test_resident_voice_reaches_the_channel() -> None:
+    # Так жалоба звучит у самого жителя: без слова «жалоба», зато с «третий
+    # год» и «опасно». Эти обороты сняты с живых постов пабликов СКО.
+    road = _complaint(
+        "Жители Троицкого не дождались обещанного ремонта дороги, третий год ходят по грязи"
+    )
+    assert road.relevant and road.category == "дороги"
+
+    sidewalk = _complaint(
+        "Здравствуйте. Опасно проходить этот участок тротуара особенно с детьми. "
+        "Побелить побелили, но в порядок не привели. Падение плиты может чревато "
+        "обойтись. Тротуар по Муканова"
+    )
+    assert sidewalk.relevant and sidewalk.category == "дороги"
+
+
+def test_volunteer_news_no_longer_trips_on_the_word_container() -> None:
+    # Голое слово «контейнер» ловило новость про раздельный сбор мусора.
+    analysis = _complaint(
+        "В Северо-Казахстанской области волонтёрское движение объединяет более 10 тысяч "
+        "человек, действуют свыше 50 организаций, установлены контейнеры для раздельного сбора"
+    )
+    assert not analysis.relevant and not analysis.needs_review
+
+
+def test_ordinary_city_news_is_still_dropped() -> None:
+    for text in (
+        "В Петропавловске ярко прошел международный праздник Сабантуй",
+        "Кызылжар обыграл Жетысу в 19-м туре КПЛ",
+        "Продам квартиру в центре, 3 комнаты, недорого",
+    ):
+        analysis = _complaint(text)
+        assert not analysis.relevant and not analysis.needs_review, text
+
+
+def test_pretty_courtyard_post_is_not_a_road_complaint() -> None:
+    # Голый корень «дорог» ловил «дорожки» и «дорогие»: пост про красивый двор
+    # уходил на проверку. Маркер сужен до связок по смыслу.
+    analysis = _complaint(
+        "Есть в Петропавловске место, где будто оживает сказка. Обычный двор "
+        "превратился в маленький мир красоты, повсюду цветы, яркие краски, "
+        "дорожки и скульптуры сказочных героев"
+    )
+    assert not analysis.relevant and not analysis.needs_review
+
+
+def test_road_surface_complaint_still_reaches_the_channel() -> None:
+    assert _complaint("Дорожное покрытие на Жумабаева полностью разбито").relevant

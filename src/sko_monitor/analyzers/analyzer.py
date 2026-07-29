@@ -18,7 +18,12 @@ class PublicationAnalyzer:
             # Meaning similarity may help an analyst inspect a candidate, but
             # it must never turn ordinary local content into a channel alert.
             relevant = rules.score >= 0.58
-            needs_review = not relevant and semantic >= 0.72
+            # 0.42 означает «тема жалобы опознана, но прямых слов жалобы нет» —
+            # так выглядит «не дождались ремонта дороги». Раньше такие посты
+            # исчезали совсем, потому что путь на проверку открывала только
+            # смысловая модель, а на Mac она не установлена. Для контура жалоб
+            # пропущенное обращение хуже лишней строки в «НА ПРОВЕРКУ».
+            needs_review = not relevant and (semantic >= 0.72 or rules.score >= 0.42)
             category = rules.category if rules.score else "возможная жалоба"
             tone = "негативная" if relevant or needs_review else "нейтральная"
         elif publication.workflow == "sko_mentions":

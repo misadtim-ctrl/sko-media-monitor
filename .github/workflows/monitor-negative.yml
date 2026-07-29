@@ -44,27 +44,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg tesseract-ocr tesseract-ocr-rus tesseract-ocr-kaz
-          pip install '.[instagram,semantic,media]'
+          pip install '.[semantic,media]'
 
-      - name: Restore reusable Instagram session
-        env:
-          INSTAGRAM_SESSION_B64: ${{ secrets.INSTAGRAM_SESSION_B64 }}
-        run: |
-          mkdir -p data
-          if [ -n "$INSTAGRAM_SESSION_B64" ]; then
-            printf '%s' "$INSTAGRAM_SESSION_B64" | base64 --decode > data/instagram-session
-            chmod 600 data/instagram-session
-          fi
+      # Сессия Instagram сюда больше не передаётся. Instagram отвечает 429 на
+      # любой адрес дата-центра, поэтому собрать отсюда всё равно нечего, а
+      # показывать сохранённый вход с чужого адреса — риск для аккаунта.
+      # Городские паблики собирает Mac: launchd/kz.sko.monitor.instagram.plist.
+      - name: Prepare data directory
+        run: mkdir -p data
 
       - name: Run complaint monitoring
         env:
           APPS_SCRIPT_WEBHOOK_URL: ${{ secrets.APPS_SCRIPT_WEBHOOK_URL }}
           MONITOR_WEBHOOK_SECRET: ${{ secrets.MONITOR_WEBHOOK_SECRET }}
-          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
-          INSTAGRAM_SESSION_FILE: data/instagram-session
-          INSTAGRAM_MIN_DELAY_SECONDS: "25"
-          INSTAGRAM_PROFILES_PER_RUN: "32"
-          INSTAGRAM_POSTS_PER_PROFILE: "8"
+          INSTAGRAM_ENABLED: "false"
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v22.0' }}
